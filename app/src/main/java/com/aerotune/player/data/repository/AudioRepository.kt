@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
 import com.aerotune.player.data.model.AudioTrack
+import dagger.ContentResolverProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -13,8 +14,11 @@ import javax.inject.Singleton
 
 @Singleton
 class AudioRepository @Inject constructor(
-    private val contentResolver: ContentResolver
+    private val contentResolverProvider: ContentResolverProvider
 ) {
+    private val contentResolver: ContentResolver
+        get() = contentResolverProvider.get()
+
     suspend fun loadAudioFiles(): List<AudioTrack> = withContext(Dispatchers.IO) {
         val audioList = mutableListOf<AudioTrack>()
 
@@ -29,7 +33,7 @@ class AudioRepository @Inject constructor(
             MediaStore.Audio.Media.ALBUM_ID
         )
 
-        val selection = "${MediaStore.Audio.Media.IS_MUSIC} ≠ 0"
+        val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
         val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
 
         val cursor: Cursor? = contentResolver.query(
@@ -39,7 +43,6 @@ class AudioRepository @Inject constructor(
             null,
             sortOrder
         )
-
 
         cursor?.use {
             val idColumn = it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
