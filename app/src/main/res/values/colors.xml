@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background_primary">#FF0D0D0D</color>
+    <color name="background_secondary">#FF1A1A1A</color>
+    <color name="background_tertiary">#FF262626</color>
+    <color name="surface_glass">#40FFFFFF</color>
+    <color name="primary">#FF7B5CFF</color>
+    <color name="primary_variant">#FF9D7FFF</color>
+    <color name="on_primary">#FFFFFFFF</color>
+    <color name="on_background">#FFFFFFFF</color>
+    <color name="on_surface">#FFFFFFFF</color>
+    <color name="on_surface_variant">#B3FFFFFF</color>
+    <color name="accent_gradient_start">#FF7B5CFF</color>
+    <color name="accent_gradient_end">#FF5C9AFF</color>
+</resources>
