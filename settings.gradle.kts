@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "AeroTune"
-include(":app")
+include ':app'
