@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.aerotune.player.ui.theme.AeroTuneColorScheme
 
 @Composable
 fun GlassmorphismBackground(
@@ -16,18 +15,12 @@ fun GlassmorphismBackground(
     content: @Composable () -> Unit
 ) {
     Box(
-        modifier = modifier
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        AeroTuneColorScheme.surface.copy(alpha = 0.85f),
-                        AeroTuneColorScheme.background.copy(alpha = 0.95f)
-                    )
-                )
+        modifier = modifier.background(
+            brush = Brush.verticalGradient(
+                colors = listOf(Color(0xD9121225), Color(0xF20D0D1A))
             )
-    ) {
-        content()
-    }
+        )
+    ) { content() }
 }
 
 @Composable
@@ -36,36 +29,21 @@ fun GradientBackground(
     content: @Composable () -> Unit
 ) {
     Box(
-        modifier = modifier
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF1A1A2E),
-                        Color(0xFF0D0D1A),
-                        Color(0xFF050510)
-                    )
-                )
+        modifier = modifier.background(
+            brush = Brush.verticalGradient(
+                colors = listOf(Color(0xFF1A1A2E), Color(0xFF0D0D1A), Color(0xFF050510))
             )
-    ) {
-        content()
-    }
+        )
+    ) { content() }
 }
 
 @Composable
-fun PlayerBackground(
-    modifier: Modifier = Modifier
-) {
+fun PlayerBackground(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .size(300.dp)
-            .background(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        Color(0x4000D4FF),
-                        Color(0x2000D4FF),
-                        Color(0x0000D4FF)
-                    )
-                )
+        modifier = modifier.size(300.dp).background(
+            brush = Brush.radialGradient(
+                colors = listOf(Color(0x4000D4FF), Color(0x2000D4FF), Color.Transparent)
             )
+        )
     )
 }
