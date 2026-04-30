@@ -5,11 +5,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
-import com.aerotune.player.ui.theme.Primary
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun AudioVisualizer(
@@ -17,11 +16,11 @@ fun AudioVisualizer(
     progress: Float = 0f,
     isPlaying: Boolean = false
 ) {
+    val primaryColor = Color(0xFF00D4FF)
     Canvas(modifier = modifier.size(200.dp)) {
         val strokeWidth = 8.dp.toPx()
         val radius = (size.minDimension - strokeWidth) / 2
         val center = Offset(size.width / 2, size.height / 2)
-        
         drawCircle(
             color = Color.Gray.copy(alpha = 0.3f),
             radius = radius,
@@ -29,7 +28,7 @@ fun AudioVisualizer(
             style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
         )
         drawArc(
-            color = Primary,
+            color = primaryColor,
             startAngle = -90f,
             sweepAngle = 360f * progress,
             useCenter = false,
