@@ -1,0 +1,80 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: 8.11.1
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: aerotune-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: aerotune-debug
+          path: app/build/outputs/apk/debug/
+
+      - name: Get version info
+        run: |
+          echo "VERSION=$(cat gradle.properties | grep -i versionName | cut -d'=' -f2)" >> $GITHUB_ENV
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/debug/app-debug.apk
+          name: AeroTune v${{ env.VERSION }}
+          body: |
+            AeroTune Android Music Player Release
+            
+            Ultra-premium music player with:
+            - Glassmorphism dark mode UI
+            - Local audio file scanning
+            - Play/pause/skip controls
+            - Beautiful now-playing screen
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
