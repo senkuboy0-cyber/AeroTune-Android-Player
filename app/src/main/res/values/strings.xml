@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AeroTune</string>
+    <string name="permission_audio_title">Audio Files Access</string>
+    <string name="permission_audio_rationale">AeroTune needs access to your audio files to play music from your device.</string>
+    <string name="permission_notification_title">Notifications</string>
+    <string name="permission_notification_rationale">Allow notifications to see playback controls.</string>
+    <string name="library">Library</string>
+    <string name="now_playing">Now Playing</string>
+    <string name="playlist">Playlist</string>
+    <string name="no_songs_found">No audio files found</string>
+    <string name="tap_to_scan">Tap to scan for music</string>
+    <string name="scanning">Scanning...</string>
+    <string name="unknown_artist">Unknown Artist</string>
+    <string name="unknown_album">Unknown Album</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="shuffle">Shuffle</string>
+    <string name="repeat">Repeat</string>
 </resources>
