@@ -16,3 +16,10 @@ dependencyResolutionManagement {
 
 rootProject.name = "AeroTune"
 include(":app")
+
+// Setup Compose compiler build to allow local compose version overrides
+gradle.beforeProject {
+    if (project.name == "composecompiler") {
+        return@beforeProject
+    }
+}
