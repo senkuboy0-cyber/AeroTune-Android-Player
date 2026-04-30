@@ -13,6 +13,14 @@ object ContentResolverModule {
     @Provides
     @Singleton
     fun provideContentResolver(
-        contentResolver: ContentResolver
-    ): ContentResolver = contentResolver
+        appContentResolver: AppContentResolver
+    ): ContentResolver {
+        return appContentResolver.get()
+    }
+}
+
+class AppContentResolver @javax.inject.Inject constructor(
+    private val resolver: ContentResolver
+) {
+    fun get(): ContentResolver = resolver
 }
