@@ -11,10 +11,12 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.aerotune.player.ui.theme.OnSurface
+import com.aerotune.player.ui.theme.OnSurfaceVariant
 import com.aerotune.player.ui.theme.Primary
 
 @Composable
-fun PlayIcon(modifier: Dp = 24.dp) {
+fun PlayIcon(modifier: Dp = 24.dp, tint: Color = Primary) {
     Canvas(modifier = Modifier.size(modifier)) {
         val path = Path().apply {
             moveTo(size.width * 0.25f, size.height * 0.15f)
@@ -22,54 +24,53 @@ fun PlayIcon(modifier: Dp = 24.dp) {
             lineTo(size.width * 0.8f, size.height * 0.5f)
             close()
         }
-        drawPath(path, Primary)
+        drawPath(path, tint)
     }
 }
 
 @Composable
-fun PauseIcon(modifier: Dp = 24.dp) {
+fun PauseIcon(modifier: Dp = 24.dp, tint: Color = Primary) {
     Canvas(modifier = Modifier.size(modifier)) {
         val barWidth = size.width * 0.25f
         val barHeight = size.height * 0.6f
         val gap = size.width * 0.1f
-        drawRect(Primary, Offset.Zero, Size(barWidth, barHeight))
-        drawRect(Primary, Offset(gap + barWidth, 0f), Size(barWidth, barHeight))
+        drawRect(tint, Offset.Zero, Size(barWidth, barHeight))
+        drawRect(tint, Offset(gap + barWidth, 0f), Size(barWidth, barHeight))
     }
 }
 
 @Composable
-fun NextIcon(modifier: Dp = 24.dp) {
+fun NextIcon(modifier: Dp = 24.dp, tint: Color = Primary) {
     Canvas(modifier = Modifier.size(modifier)) {
         val barWidth = size.width * 0.08f
-        drawRect(Primary, Offset(size.width * 0.55f, size.height * 0.2f), Size(barWidth, size.height * 0.6f))
+        drawRect(tint, Offset(size.width * 0.55f, size.height * 0.2f), Size(barWidth, size.height * 0.6f))
         val path = Path().apply {
             moveTo(size.width * 0.35f, size.height * 0.2f)
             lineTo(size.width * 0.35f, size.height * 0.8f)
             lineTo(size.width * 0.8f, size.height * 0.5f)
             close()
         }
-        drawPath(path, Primary)
+        drawPath(path, tint)
     }
 }
 
-
 @Composable
-fun PreviousIcon(modifier: Dp = 24.dp) {
+fun PreviousIcon(modifier: Dp = 24.dp, tint: Color = Primary) {
     Canvas(modifier = Modifier.size(modifier)) {
         val barWidth = size.width * 0.08f
-        drawRect(Primary, Offset(size.width * 0.37f, size.height * 0.2f), Size(barWidth, size.height * 0.6f))
+        drawRect(tint, Offset(size.width * 0.37f, size.height * 0.2f), Size(barWidth, size.height * 0.6f))
         val path = Path().apply {
             moveTo(size.width * 0.65f, size.height * 0.2f)
             lineTo(size.width * 0.65f, size.height * 0.8f)
             lineTo(size.width * 0.2f, size.height * 0.5f)
             close()
         }
-        drawPath(path, Primary)
+        drawPath(path, tint)
     }
 }
 
 @Composable
-fun BackIcon(modifier: Dp = 24.dp) {
+fun BackIcon(modifier: Dp = 24.dp, tint: Color = Primary) {
     Canvas(modifier = Modifier.size(modifier)) {
         val path = Path().apply {
             moveTo(size.width * 0.55f, size.height * 0.15f)
@@ -77,15 +78,15 @@ fun BackIcon(modifier: Dp = 24.dp) {
             lineTo(size.width * 0.55f, size.height * 0.85f)
             close()
         }
-        drawPath(path, Primary)
+        drawPath(path, tint)
     }
 }
 
 @Composable
-fun MusicNoteIcon(modifier: Dp = 64.dp) {
+fun MusicNoteIcon(modifier: Dp = 64.dp, tint: Color = Primary) {
     Canvas(modifier = Modifier.size(modifier)) {
         val radius = size.width * 0.15f
-        drawCircle(Primary, radius, Offset(size.width * 0.3f, size.height * 0.8f))
+        drawCircle(tint, radius, Offset(size.width * 0.3f, size.height * 0.8f))
         val stemPath = Path().apply {
             moveTo(size.width * 0.65f, size.height * 0.78f)
             lineTo(size.width * 0.65f, size.height * 0.2f)
@@ -93,6 +94,16 @@ fun MusicNoteIcon(modifier: Dp = 64.dp) {
             lineTo(size.width * 0.88f, size.height * 0.78f)
             close()
         }
-        drawPath(stemPath, Primary)
+        drawPath(stemPath, tint)
+    }
+}
+
+@Composable
+fun LibraryIcon(modifier: Dp = 24.dp, tint: Color = OnSurfaceVariant) {
+    Canvas(modifier = Modifier.size(modifier)) {
+        val barPadding = size.width * 0.1f
+        drawRect(tint, Offset(barPadding, 0f), Size(size.width * 0.2f, size.height))
+        drawRect(tint, Offset(size.width * 0.4f, 0f), Size(size.width * 0.2f, size.height))
+        drawRect(tint, Offset(size.width * 0.7f, 0f), Size(size.width * 0.2f, size.height))
     }
 }
