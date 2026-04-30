@@ -14,9 +14,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -51,13 +52,9 @@ import com.aerotune.player.ui.MainViewModel
 import com.aerotune.player.ui.theme.BackgroundPrimary
 import com.aerotune.player.ui.theme.BackgroundSecondary
 import com.aerotune.player.ui.theme.BackgroundTertiary
-import com.aerotune.player.ui.theme.GradientEnd
-import com.aerotune.player.ui.theme.GradientStart
 import com.aerotune.player.ui.theme.OnSurface
 import com.aerotune.player.ui.theme.OnSurfaceVariant
 import com.aerotune.player.ui.theme.Primary
-import com.aerotune.player.ui.theme.SurfaceGlass
-import com.aerotune.player.ui.theme.SurfaceGlassDark
 import kotlinx.coroutines.delay
 
 @Composable
@@ -98,7 +95,6 @@ fun NowPlayingScreen(
                 NowPlayingHeader(onBackClick = onBackClick)
 
                 Spacer(modifier = Modifier.height(48.dp))
-
                 AlbumArt(
                     track = track,
                     modifier = Modifier
@@ -107,14 +103,12 @@ fun NowPlayingScreen(
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
-
                 TrackInfo(
                     track = track,
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
-
 
                 ProgressBar(
                     currentPosition = sliderPosition,
@@ -123,9 +117,7 @@ fun NowPlayingScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-
                 Spacer(modifier = Modifier.height(24.dp))
-
 
                 PlaybackControls(
                     isPlaying = isPlaying,
@@ -153,7 +145,7 @@ private fun NowPlayingHeader(onBackClick: () -> Unit) {
                     .background(BackgroundSecondary, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                BackIcon()
+                Text("<", color = Primary)
             }
         }
     }
@@ -216,7 +208,9 @@ private fun AlbumArt(track: AudioTrack, modifier: Modifier = Modifier) {
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
-                    MusicNoteIcon(
+                    Icon(
+                        imageVector = Icons.Default.MusicNote,
+                        contentDescription = null,
                         modifier = Modifier.size(80.dp),
                         tint = OnSurfaceVariant
                     )
@@ -225,7 +219,6 @@ private fun AlbumArt(track: AudioTrack, modifier: Modifier = Modifier) {
         }
     }
 }
-
 
 @Composable
 private fun TrackInfo(track: AudioTrack, modifier: Modifier = Modifier) {
@@ -252,6 +245,7 @@ private fun TrackInfo(track: AudioTrack, modifier: Modifier = Modifier) {
     }
 }
 
+
 @Composable
 private fun ProgressBar(
     currentPosition: Long,
@@ -271,7 +265,6 @@ private fun ProgressBar(
                 inactiveTrackColor = BackgroundTertiary
             )
         )
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -306,33 +299,28 @@ private fun PlaybackControls(
             onClick = onPrevious,
             modifier = Modifier.size(56.dp)
         ) {
-            PreviousIcon()
+            Text("<<", color = OnSurface, fontSize = androidx.compose.ui.unit.TextUnit.Unicode)
         }
 
         Box(
             modifier = Modifier
                 .size(72.dp)
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(GradientStart, GradientEnd)
-                    ),
-                    CircleShape
-                )
+                .background(Primary, CircleShape)
                 .clickable(onClick = onPlayPause),
             contentAlignment = Alignment.Center
         ) {
-            if (isPlaying) {
-                PauseIcon(modifier = Modifier.size(32.dp))
-            } else {
-                PlayIcon(modifier = Modifier.size(32.dp))
-            }
+            Text(
+                text = if (isPlaying) ">" else ">",
+                color = Color.Black,
+                fontSize = androidx.compose.ui.unit.TextUnit.Unicode
+            )
         }
 
         IconButton(
             onClick = onNext,
             modifier = Modifier.size(56.dp)
         ) {
-            NextIcon()
+            Text(">>", color = OnSurface)
         }
     }
 }
