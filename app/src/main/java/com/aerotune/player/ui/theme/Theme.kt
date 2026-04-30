@@ -49,6 +49,11 @@ val InversePrimary = Color(0xFF1A5060)
 val SurfaceTint = Color(0xFF00D4FF)
 val Scrim = Color(0xFF000000)
 
+val GradientStart = Color(0xFF00D4FF)
+val GradientEnd = Color(0xFF0088AA)
+val SurfaceGlass = Color(0x4000D4FF)
+val SurfaceGlassDark = Color(0x6000D4FF)
+
 val AeroTuneColorScheme = darkColorScheme(
     primary = Primary,
     onPrimary = OnPrimary,
