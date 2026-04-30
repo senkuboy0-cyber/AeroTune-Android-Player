@@ -1,0 +1,8 @@
+Pkte {
+    <definitions> {
+        <define name="org.gradle.internal.compile.ToolsSupport" />
+    }
+    <filesets> {
+        <file>$APP_HOME/lib/gradle-wrapper.jar</file>
+    }
+}
