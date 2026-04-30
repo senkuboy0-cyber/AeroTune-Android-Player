@@ -10,17 +10,14 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
     @Provides
     @Singleton
     fun provideContentResolver(
-        androidContentResolver: AndroidContentResolver
-    ): ContentResolver {
-        return androidContentResolver.get()
-    }
+        resolver: AppContentResolver
+    ): ContentResolver = resolver.get()
 }
 
-class AndroidContentResolver @javax.inject.Inject constructor(
+class AppContentResolver @javax.inject.Inject constructor(
     private val resolver: ContentResolver
 ) {
     fun get(): ContentResolver = resolver
