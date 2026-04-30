@@ -8,25 +8,42 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.aerotune.player.ui.theme.OnSurfaceVariant
-import com.aerotune.player.ui.theme.Primary
+import com.aerotune.player.ui.theme.AeroTuneColorScheme
 
 @Composable
-fun PlayIcon(modifier: Modifier = Modifier(64.dp)) {
-    Canvas(modifier = modifier) {
+fun PlayIcon(
+    modifier: Modifier = Modifier,
+    color: Color = AeroTuneColorScheme.primary
+) {
+    Canvas(modifier = modifier.size(24.dp)) {
         val path = createPlayPath()
-        drawPath(path, Primary)
+        drawPath(path, color)
     }
 }
 
 @Composable
-fun PauseIcon(modifier: Modifier = Modifier(64.dp)) {
-    Canvas(modifier = modifier) {
-        drawRect(Primary, size.copy(size.width / 3, size.height * 0.6f).to androidx.compose.ui.geometry.Offset((size.width - size.width / 3) / 2, size.height * 0.2f))
-        drawRect(Primary, size.copy(size.width / 3, size.height * 0.6f).to androidx.compose.ui.geometry.Offset((size.width - size.width / 3) / 2 + size.width / 3 + 4.dp.toPx(), size.height * 0.2f))
+fun PauseIcon(
+    modifier: Modifier = Modifier,
+    color: Color = AeroTuneColorScheme.primary
+) {
+    Canvas(modifier = modifier.size(24.dp)) {
+        val barWidth = size.width / 3
+        val barHeight = size.height * 0.6f
+        val startX = (size.width - barWidth) / 2
+        val startY = size.height * 0.2f
+        
+        drawRect(
+            color = color,
+            topLeft = Offset(startX, startY),
+            size = androidx.compose.ui.geometry.Size(barWidth, barHeight)
+        )
+        drawRect(
+            color = color,
+            topLeft = Offset(startX + barWidth + 4.dp.toPx(), startY),
+            size = androidx.compose.ui.geometry.Size(barWidth, barHeight)
+        )
     }
 }
 
