@@ -2,13 +2,11 @@ package com.aerotune.player.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 // Using system fonts as fallback - Inter/Poppins would be loaded via Google Fonts
-// For this implementation, we'll use the default sans-serif with custom weights
 private val AeroTuneFontFamily = FontFamily.SansSerif
 
 val AeroTuneTypography = Typography(
