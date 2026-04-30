@@ -19,15 +19,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.RepeatOne
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -35,9 +37,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -46,7 +45,6 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -65,11 +63,10 @@ import coil.compose.AsyncImage
 import com.aerotune.player.data.model.AudioTrack
 import com.aerotune.player.data.model.PlaybackState
 import com.aerotune.player.data.model.RepeatMode
-import com.aerotune.player.ui.components.PlayerBackground
-import com.aerotune.player.ui.theme.AeroTuneColorScheme
-import com.aerotune.player.ui.components.icons.RepeatIcon
-import com.aerotune.player.ui.components.icons.RepeatOneIcon
-import com.aerotune.player.ui.components.icons.ShuffleIcon
+import com.aerotune.player.ui.theme.BackgroundPrimary
+import com.aerotune.player.ui.theme.OnSurface
+import com.aerotune.player.ui.theme.OnSurfaceVariant
+import com.aerotune.player.ui.theme.Primary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,7 +92,7 @@ fun MainScreen(
     }
 
     val gradientColors = listOf(
-        AeroTuneColorScheme.background,
+        BackgroundPrimary,
         Color(0xFF0A0A15),
         Color(0xFF050510)
     )
@@ -123,15 +120,14 @@ fun MainScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                // Tab Row
                 TabRow(
                     selectedTabIndex = uiState.currentTab,
                     containerColor = Color.Transparent,
-                    contentColor = AeroTuneColorScheme.primary,
+                    contentColor = Primary,
                     indicator = { tabPositions ->
                         TabRowDefaults.Indicator(
                             modifier = Modifier.tabIndicatorOffset(tabPositions[uiState.currentTab]),
-                            color = AeroTuneColorScheme.primary
+                            color = Primary
                         )
                     }
                 ) {
@@ -185,14 +181,12 @@ private fun LibraryTab(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    CircularProgressIndicator(
-                        color = AeroTuneColorScheme.primary
-                    )
+                    CircularProgressIndicator(color = Primary)
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "Scanning...",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = AeroTuneColorScheme.onSurfaceVariant
+                        color = OnSurfaceVariant
                     )
                 }
             }
@@ -208,13 +202,13 @@ private fun LibraryTab(
                     Text(
                         text = "No audio files found",
                         style = MaterialTheme.typography.titleMedium,
-                        color = AeroTuneColorScheme.onSurface
+                        color = OnSurface
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Tap to scan for music",
                         style = MaterialTheme.typography.bodySmall,
-                        color = AeroTuneColorScheme.onSurfaceVariant
+                        color = OnSurfaceVariant
                     )
                 }
             }
@@ -225,7 +219,7 @@ private fun LibraryTab(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                itemsIndexed(tracks) { index, track ->
+                itemsIndexed(tracks) { _, track ->
                     TrackItem(
                         track = track,
                         isPlaying = track == currentTrack,
@@ -248,10 +242,7 @@ fun TrackItem(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = if (isPlaying)
-                AeroTuneColorScheme.primaryContainer.copy(alpha = 0.3f)
-            else
-                AeroTuneColorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = if (isPlaying) Primary.copy(alpha = 0.3f) else Primary.copy(alpha = 0.1f)
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -261,44 +252,33 @@ fun TrackItem(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Album Art
             AsyncImage(
                 model = track.albumArtUri,
                 contentDescription = track.album,
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                modifier = Modifier.size(56.dp).clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
-
             Spacer(modifier = Modifier.width(12.dp))
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = track.title,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = if (isPlaying)
-                        AeroTuneColorScheme.primary
-                    else
-                        AeroTuneColorScheme.onSurface,
+                    color = if (isPlaying) Primary else OnSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = track.artist,
                     style = MaterialTheme.typography.bodySmall,
-                    color = AeroTuneColorScheme.onSurfaceVariant,
+                    color = OnSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-
             Text(
                 text = track.formatDuration(),
                 style = MaterialTheme.typography.labelMedium,
-                color = AeroTuneColorScheme.onSurfaceVariant
+                color = OnSurfaceVariant
             )
         }
     }
@@ -315,178 +295,107 @@ fun NowPlayingTab(
     onSeek: (Long) -> Unit
 ) {
     val track = playbackState.currentTrack
-
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         if (track == null) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "No track playing",
                     style = MaterialTheme.typography.titleMedium,
-                    color = AeroTuneColorScheme.onSurfaceVariant
+                    color = OnSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Select a track from the library",
                     style = MaterialTheme.typography.bodySmall,
-                    color = AeroTuneColorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    color = OnSurfaceVariant.copy(alpha = 0.7f)
                 )
             }
         } else {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp),
+                modifier = Modifier.fillMaxSize().padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // Album Art with glow effect
                 Box(
-                    modifier = Modifier
-                        .size(250.dp)
-                        .blur(50.dp),
+                    modifier = Modifier.size(250.dp).blur(50.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    PlayerBackground()
+                    Box(
+                        modifier = Modifier
+                            .size(200.dp)
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(Primary.copy(alpha = 0.4f), Primary.copy(alpha = 0.2f), Color.Transparent)
+                                )
+                            )
+                    )
                 }
-
                 AsyncImage(
                     model = track.albumArtUri,
                     contentDescription = track.album,
-                    modifier = Modifier
-                        .size(220.dp)
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(
-                            AeroTuneColorScheme.surfaceVariant.copy(alpha = 0.5f)
-                        ),
+                    modifier = Modifier.size(220.dp).clip(RoundedCornerShape(24.dp)),
                     contentScale = ContentScale.Crop
                 )
-
                 Spacer(modifier = Modifier.height(32.dp))
-
-                // Track Info
                 Text(
                     text = track.title,
                     style = MaterialTheme.typography.headlineSmall,
-                    color = AeroTuneColorScheme.onSurface
+                    color = OnSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = track.artist,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = AeroTuneColorScheme.onSurfaceVariant
+                    color = OnSurfaceVariant
                 )
-
                 Spacer(modifier = Modifier.height(32.dp))
-
-                // Progress Slider
                 Slider(
-                    value = if (playbackState.duration > 0)
-                        playbackState.currentPosition.toFloat() / playbackState.duration
-                    else 0f,
-                    onValueChange = { fraction ->
-                        onSeek((fraction * playbackState.duration).toLong())
-                    },
+                    value = if (playbackState.duration > 0) playbackState.currentPosition.toFloat() / playbackState.duration else 0f,
+                    onValueChange = { fraction -> onSeek((fraction * playbackState.duration).toLong()) },
                     colors = SliderDefaults.colors(
-                        thumbColor = AeroTuneColorScheme.primary,
-                        activeTrackColor = AeroTuneColorScheme.primary,
-                        inactiveTrackColor = AeroTuneColorScheme.surfaceVariant
+                        thumbColor = Primary,
+                        activeTrackColor = Primary,
+                        inactiveTrackColor = Primary.copy(alpha = 0.3f)
                     )
                 )
-
-                // Time Labels
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = formatTime(playbackState.currentPosition),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = AeroTuneColorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = formatTime(playbackState.duration),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = AeroTuneColorScheme.onSurfaceVariant
-                    )
+                    Text(text = formatTime(playbackState.currentPosition), style = MaterialTheme.typography.labelSmall, color = OnSurfaceVariant)
+                    Text(text = formatTime(playbackState.duration), style = MaterialTheme.typography.labelSmall, color = OnSurfaceVariant)
                 }
-
                 Spacer(modifier = Modifier.height(24.dp))
-
-                // Playback Controls
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Shuffle
                     IconButton(onClick = onShuffle) {
-                        Icon(
-                            imageVector = ShuffleIcon,
-                            contentDescription = "Shuffle",
-                            tint = if (playbackState.shuffleEnabled)
-                                AeroTuneColorScheme.primary
-                            else
-                                AeroTuneColorScheme.onSurfaceVariant
-                        )
+                        Icon(Icons.Default.Shuffle, "Shuffle", tint = if (playbackState.shuffleEnabled) Primary else OnSurfaceVariant)
                     }
-
-                    // Previous
                     IconButton(onClick = onPrevious) {
-                        Icon(
-                            imageVector = Icons.Default.SkipPrevious,
-                            contentDescription = "Previous",
-                            tint = AeroTuneColorScheme.onSurface,
-                            modifier = Modifier.size(36.dp)
-                        )
+                        Icon(Icons.Default.SkipPrevious, "Previous", tint = OnSurface, modifier = Modifier.size(36.dp))
                     }
-
-                    // Play/Pause
                     Box(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .clip(CircleShape)
-                            .background(AeroTuneColorScheme.primary)
-                            .clickable(onClick = onPlayPause),
+                        modifier = Modifier.size(72.dp).clip(CircleShape).background(Primary).clickable(onClick = onPlayPause),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = if (playbackState.isPlaying)
-                                Icons.Default.Pause
-                            else
-                                Icons.Default.PlayArrow,
-                            contentDescription = if (playbackState.isPlaying) "Pause" else "Play",
-                            tint = AeroTuneColorScheme.onPrimary,
+                            if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                            if (playbackState.isPlaying) "Pause" else "Play",
+                            tint = Color.Black,
                             modifier = Modifier.size(40.dp)
                         )
                     }
-
-                    // Next
                     IconButton(onClick = onNext) {
-                        Icon(
-                            imageVector = Icons.Default.SkipNext,
-                            contentDescription = "Next",
-                            tint = AeroTuneColorScheme.onSurface,
-                            modifier = Modifier.size(36.dp)
-                        )
+                        Icon(Icons.Default.SkipNext, "Next", tint = OnSurface, modifier = Modifier.size(36.dp))
                     }
-
-                    // Repeat
                     IconButton(onClick = onRepeat) {
                         Icon(
-                            imageVector = when (playbackState.repeatMode) {
-                                RepeatMode.ONE -> RepeatOneIcon
-                                else -> RepeatIcon
-                            },
-                            contentDescription = "Repeat",
-                            tint = if (playbackState.repeatMode != RepeatMode.OFF)
-                                AeroTuneColorScheme.primary
-                            else
-                                AeroTuneColorScheme.onSurfaceVariant
+                            if (playbackState.repeatMode == RepeatMode.ONE) Icons.Default.RepeatOne else Icons.Default.Repeat,
+                            "Repeat",
+                            tint = if (playbackState.repeatMode != RepeatMode.OFF) Primary else OnSurfaceVariant
                         )
                     }
                 }
@@ -503,90 +412,54 @@ fun PlayerBottomBar(
     onPrevious: () -> Unit
 ) {
     val track = playbackState.currentTrack ?: return
-
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = AeroTuneColorScheme.surfaceVariant.copy(alpha = 0.95f)
-        ),
+        colors = CardDefaults.cardColors(containerColor = Primary.copy(alpha = 0.95f)),
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Mini Album Art
             AsyncImage(
                 model = track.albumArtUri,
                 contentDescription = track.album,
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
-
             Spacer(modifier = Modifier.width(12.dp))
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = track.title,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = AeroTuneColorScheme.onSurface,
+                    color = OnSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = track.artist,
                     style = MaterialTheme.typography.bodySmall,
-                    color = AeroTuneColorScheme.onSurfaceVariant,
+                    color = OnSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-
-            // Previous
-            IconButton(onClick = onPrevious) {
-                Icon(
-                    imageVector = Icons.Default.SkipPrevious,
-                    contentDescription = "Previous",
-                    tint = AeroTuneColorScheme.onSurface
-                )
-            }
-
-            // Play/Pause
+            IconButton(onClick = onPrevious) { Icon(Icons.Default.SkipPrevious, "Previous", tint = OnSurface) }
             Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(AeroTuneColorScheme.primary)
-                    .clickable(onClick = onPlayPause),
+                modifier = Modifier.size(48.dp).clip(CircleShape).background(Primary).clickable(onClick = onPlayPause),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (playbackState.isPlaying)
-                        Icons.Default.Pause
-                    else
-                        Icons.Default.PlayArrow,
-                    contentDescription = if (playbackState.isPlaying) "Pause" else "Play",
-                    tint = AeroTuneColorScheme.onPrimary
+                    if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                    if (playbackState.isPlaying) "Pause" else "Play",
+                    tint = Color.Black
                 )
             }
-
-            // Next
-            IconButton(onClick = onNext) {
-                Icon(
-                    imageVector = Icons.Default.SkipNext,
-                    contentDescription = "Next",
-                    tint = AeroTuneColorScheme.onSurface
-                )
-            }
+            IconButton(onClick = onNext) { Icon(Icons.Default.SkipNext, "Next", tint = OnSurface) }
         }
     }
 }
+
 
 private fun formatTime(millis: Long): String {
     val minutes = millis / 1000 / 60
