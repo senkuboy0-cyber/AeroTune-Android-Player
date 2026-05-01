@@ -9,7 +9,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +25,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -34,10 +37,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -57,14 +58,9 @@ import com.aerotune.player.ui.MainViewModel
 import com.aerotune.player.ui.theme.BackgroundPrimary
 import com.aerotune.player.ui.theme.BackgroundSecondary
 import com.aerotune.player.ui.theme.BackgroundTertiary
-import com.aerotune.player.ui.theme.GradientEnd
-import com.aerotune.player.ui.theme.GradientStart
 import com.aerotune.player.ui.theme.OnSurface
 import com.aerotune.player.ui.theme.OnSurfaceVariant
 import com.aerotune.player.ui.theme.Primary
-import com.aerotune.player.ui.theme.SurfaceGlass
-import com.aerotune.player.ui.theme.SurfaceGlassDark
-import com.aerotune.player.R
 
 @Composable
 fun LibraryScreen(
@@ -78,13 +74,9 @@ fun LibraryScreen(
     val isPlaying by viewModel.isPlaying.collectAsState()
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BackgroundPrimary)
+        modifier = Modifier.fillMaxSize().background(BackgroundPrimary)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             LibraryHeader()
 
             if (isLoading) {
@@ -96,12 +88,7 @@ fun LibraryScreen(
                 }
             } else {
                 LazyColumn(
-                    contentPadding = PaddingValues(
-                        start = 16.dp,
-                        end = 16.dp,
-                        top = 16.dp,
-                        bottom = 120.dp
-                    ),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     itemsIndexed(tracks) { index, track ->
@@ -137,9 +124,7 @@ fun LibraryScreen(
 @Composable
 private fun LibraryHeader() {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 48.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
+        modifier = Modifier.fillMaxWidth().padding(top = 48.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
     ) {
         Column {
             Text(
@@ -165,33 +150,24 @@ private fun TrackItem(
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = if (isPlaying) Primary.copy(alpha = 0.15f) else BackgroundSecondary
         ),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(BackgroundTertiary),
+                modifier = Modifier.size(56.dp).clip(RoundedCornerShape(12.dp)).background(BackgroundTertiary),
                 contentAlignment = Alignment.Center
             ) {
                 if (track.albumArtUri != null) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(track.albumArtUri)
-                            .crossfade(true)
-                            .build(),
+                            .data(track.albumArtUri).crossfade(true).build(),
                         contentDescription = track.album,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
@@ -199,22 +175,15 @@ private fun TrackItem(
                 }
                 if (isPlaying) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.5f)),
+                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)),
                         contentAlignment = Alignment.Center
                     ) {
                         PlayingIndicator()
                     }
                 }
             }
-
             Spacer(modifier = Modifier.width(16.dp))
-
-
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = track.title,
                     style = MaterialTheme.typography.bodyLarge,
@@ -231,7 +200,6 @@ private fun TrackItem(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-
             Text(
                 text = track.durationFormatted,
                 style = MaterialTheme.typography.labelMedium,
@@ -243,9 +211,7 @@ private fun TrackItem(
 
 @Composable
 private fun PlayingIndicator() {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(2.dp)
-    ) {
+    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
         repeat(3) { index ->
             val height by animateFloatAsState(
                 targetValue = if (index == 1) 20f else 12f,
@@ -253,13 +219,7 @@ private fun PlayingIndicator() {
                 label = "bar"
             )
             Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(height.dp)
-                    .background(
-                        Primary,
-                        RoundedCornerShape(2.dp)
-                    )
+                modifier = Modifier.width(3.dp).height(height.dp).background(Primary, RoundedCornerShape(2.dp))
             )
         }
     }
@@ -273,49 +233,31 @@ private fun MiniPlayer(
     onPlayPause: () -> Unit,
     onNext: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
+    Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick),
-            colors = CardDefaults.cardColors(containerColor = SurfaceGlassDark),
+            modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+            colors = CardDefaults.cardColors(containerColor = Primary.copy(alpha = 0.6f)),
             shape = RoundedCornerShape(24.dp)
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
+                modifier = Modifier.fillMaxWidth().padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(BackgroundTertiary),
+                    modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(BackgroundTertiary),
                     contentAlignment = Alignment.Center
                 ) {
                     if (track.albumArtUri != null) {
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data(track.albumArtUri)
-                                .crossfade(true)
-                                .build(),
+                                .data(track.albumArtUri).crossfade(true).build(),
                             contentDescription = track.album,
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .blur(8.dp)
+                            modifier = Modifier.fillMaxSize().blur(8.dp)
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.width(12.dp))
-
-
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = track.title,
@@ -332,29 +274,24 @@ private fun MiniPlayer(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-
                 IconButton(onClick = onPlayPause) {
                     Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(
-                                brush = Brush.linearGradient(
-                                    colors = listOf(GradientStart, GradientEnd)
-                                ),
-                                CircleShape
-                            ),
+                        modifier = Modifier.size(40.dp).background(Primary, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        if (isPlaying) {
-                            PauseIcon()
-                        } else {
-                            PlayIcon()
-                        }
+                        Icon(
+                            if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                            contentDescription = if (isPlaying) "Pause" else "Play",
+                            tint = Color.Black
+                        )
                     }
                 }
-
                 IconButton(onClick = onNext) {
-                    NextIcon()
+                    Icon(
+                        Icons.Default.SkipNext,
+                        contentDescription = "Next",
+                        tint = OnSurface
+                    )
                 }
             }
         }
