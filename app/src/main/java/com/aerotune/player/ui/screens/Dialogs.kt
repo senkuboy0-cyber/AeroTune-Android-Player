@@ -1,13 +1,12 @@
 package com.aerotune.player.ui.screens
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.TextField
-import androidx.compose.foundation.text.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -38,6 +37,7 @@ fun SearchDialog(
             it.album.contains(searchQuery, ignoreCase = true)
         }
     }
+
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier
@@ -59,74 +59,47 @@ fun SearchDialog(
                         modifier = Modifier.weight(1f)
                     )
                     IconButton(onClick = onDismiss) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close",
-                            tint = TextGray
-                        )
+                        Icon(Icons.Default.Close, "Close", tint = TextGray)
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 // Search input
-                TextField(
+                OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
+                    modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("Search songs, artists...", color = TextGray) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = null,
-                            tint = NeonCyan
-                        )
-                    },
+                    leadingIcon = { Icon(Icons.Default.Search, null, tint = NeonCyan) },
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
                             IconButton(onClick = { searchQuery = "" }) {
-                                Icon(
-                                    imageVector = Icons.Default.Clear,
-                                    contentDescription = "Clear",
-                                    tint = TextGray
-                                )
+                                Icon(Icons.Default.Clear, "Clear", tint = TextGray)
                             }
                         }
                     },
-                    colors = TextFieldDefaults.colors(
+                    colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = TextWhite,
                         unfocusedTextColor = TextWhite,
-                        focusedContainerColor = GlassBg,
-                        unfocusedContainerColor = GlassBg,
-                        cursorColor = NeonCyan,
-                        focusedIndicatorColor = NeonCyan,
-                        unfocusedIndicatorColor = Color.Transparent
+                        focusedBorderColor = NeonCyan,
+                        unfocusedBorderColor = GlassBorder,
+                        cursorColor = NeonCyan
                     ),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 // Results
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(filteredTracks) { track ->
-                        SearchResultItem(
-                            track = track,
-                            onClick = {
-                                onTrackClick(track)
-                                onDismiss()
-                            }
-                        )
+                        SearchResultItem(track = track, onClick = {
+                            onTrackClick(track)
+                            onDismiss()
+                        })
                     }
                 }
                 if (filteredTracks.isEmpty() && searchQuery.isNotEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(32.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No results found",
-                            color = TextGray
-                        )
+                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        Text("No results found", color = TextGray)
                     }
                 }
             }
@@ -135,51 +108,21 @@ fun SearchDialog(
 }
 
 @Composable
-private fun SearchResultItem(
-    track: AudioTrack,
-    onClick: () -> Unit
-) {
+private fun SearchResultItem(track: AudioTrack, onClick: () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(8.dp),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .background(NeonCyan.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.MusicNote,
-                contentDescription = null,
-                tint = NeonCyan
-            )
+        Box(modifier = Modifier.size(48.dp).background(NeonCyan.copy(alpha = 0.2f), RoundedCornerShape(8.dp)),
+            contentAlignment = Alignment.Center) {
+            Icon(Icons.Default.MusicNote, null, tint = NeonCyan)
         }
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = track.title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = TextWhite,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = "${track.artist} - ${track.album}",
-                style = MaterialTheme.typography.bodySmall,
-                color = TextGray,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Text(track.title, style = MaterialTheme.typography.bodyLarge, color = TextWhite, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text("${track.artist} - ${track.album}", style = MaterialTheme.typography.bodySmall, color = TextGray, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        Text(
-            text = track.formatDuration(),
-            style = MaterialTheme.typography.labelSmall,
-            color = NeonCyan
-        )
+        Text(track.formatDuration(), style = MaterialTheme.typography.labelSmall, color = NeonCyan)
     }
 }
 
@@ -192,82 +135,31 @@ fun SettingsDialog(onDismiss: () -> Unit) {
             shape = RoundedCornerShape(24.dp)
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Settings",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = NeonCyan,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(1f)
-                    )
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text("Settings", style = MaterialTheme.typography.titleLarge, color = NeonCyan, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                     IconButton(onClick = onDismiss) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close",
-                            tint = TextGray
-                        )
+                        Icon(Icons.Default.Close, "Close", tint = TextGray)
                     }
                 }
                 Spacer(modifier = Modifier.height(24.dp))
-                SettingsItem(
-                    icon = Icons.Default.Info,
-                    title = "About",
-                    subtitle = "AeroTune v1.0.0"
-                )
-                SettingsItem(
-                    icon = Icons.Default.Palette,
-                    title = "Theme",
-                    subtitle = "Cyberpunk Dark"
-                )
-                SettingsItem(
-                    icon = Icons.Default.Storage,
-                    title = "Audio Quality",
-                    subtitle = "High Quality"
-                )
+                SettingsItem(Icons.Default.Info, "About", "AeroTune v1.0.0")
+                SettingsItem(Icons.Default.Palette, "Theme", "Cyberpunk Dark")
+                SettingsItem(Icons.Default.Storage, "Audio Quality", "High Quality")
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Ultra-premium Cyberpunk Music Player",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextGray,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
+                Text("Ultra-premium Cyberpunk Music Player", style = MaterialTheme.typography.bodySmall, color = TextGray, modifier = Modifier.align(Alignment.CenterHorizontally))
             }
         }
     }
 }
 
 @Composable
-private fun SettingsItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    subtitle: String
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = NeonCyan
-        )
+private fun SettingsItem(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, subtitle: String) {
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, null, tint = NeonCyan)
         Spacer(modifier = Modifier.width(16.dp))
         Column {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = TextWhite
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = TextGray
-            )
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = TextWhite)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = TextGray)
         }
     }
 }
