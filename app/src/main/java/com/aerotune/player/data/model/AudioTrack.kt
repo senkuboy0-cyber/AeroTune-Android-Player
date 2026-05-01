@@ -16,6 +16,9 @@ data class AudioTrack(
         val seconds = (duration / 1000) % 60
         return String.format("%d:%02d", minutes, seconds)
     }
+    
+    val durationFormatted: String
+        get() = formatDuration()
 }
 
 data class PlaybackState(
