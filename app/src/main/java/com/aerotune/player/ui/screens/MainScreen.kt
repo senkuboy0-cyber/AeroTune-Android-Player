@@ -11,9 +11,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -26,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aerotune.player.data.model.AudioTrack
 import com.aerotune.player.ui.theme.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
@@ -44,10 +47,23 @@ fun MainScreen(
     onNext: () -> Unit = {},
     onPrevious: () -> Unit = {},
     onSeek: (Float) -> Unit = {},
+    onSearch: (String) -> Unit = {},
+    onSettingsClick: () -> Unit = {},
     progress: Float = 0f
 ) {
     var isFullPlayerVisible by remember { mutableStateOf(false) }
     var showPermissionRequest by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    var showSearch by remember { mutableStateOf(false) }
+    var showSettings by remember { mutableStateOf(false) }
+
+    val filteredTracks = remember(tracks, searchQuery) {
+        if (searchQuery.isEmpty()) tracks
+        else tracks.filter {
+            it.title.contains(searchQuery, ignoreCase = true) ||
+            it.artist.contains(searchQuery, ignoreCase = true)
+        }
+    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -67,40 +83,53 @@ fun MainScreen(
 
     Box(modifier = Modifier.fillMaxSize().background(CyberpunkBg)) {
         AnimatedBackground()
+
+        // Settings Dialog
+        if (showSettings) {
+            SettingsDialog(onDismiss = { showSettings = false })
+        }
+
         Column(modifier = Modifier.fillMaxSize()) {
-            AnimatedHeader()
-            if (showPermissionRequest) {
-                PermissionCard(onRequestPermission = {
-                    val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        arrayOf(Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS)
-                    } else {
-                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-                    }
-                    permissionLauncher.launch(permissions)
-                })
-            } else if (tracks.isEmpty()) {
-                EmptyLibraryView()
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(bottom = 100.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    itemsIndexed(items = tracks, key = { _, track -> track.id }) { index, track ->
-                        TrackItem(
-                            track = track,
-                            isPlaying = track == currentTrack && isPlaying,
-                            isCurrent = track == currentTrack,
-                            onClick = {
-                                onTrackClick(track)
-                                isFullPlayerVisible = true
-                            },
-                            animationDelay = index * 50
-                        )
-                    }
+            AnimatedHeader(
+                showSearch = showSearch,
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                onSearchToggle = { showSearch = !showSearch },
+                onSettingsClick = { showSettings = true }
+            )
+
+            when {
+                showPermissionRequest -> {
+                    PermissionCard(onRequestPermission = {
+                        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            arrayOf(Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+                        }
+                        permissionLauncher.launch(permissions)
+                    })
+                }
+                filteredTracks.isEmpty() && tracks.isNotEmpty() -> {
+                    NoSearchResultsView()
+                }
+                filteredTracks.isEmpty() -> {
+                    EmptyLibraryView()
+                }
+                else -> {
+                    TrackList(
+                        tracks = filteredTracks,
+                        currentTrack = currentTrack,
+                        isPlaying = isPlaying,
+                        onTrackClick = { track ->
+                            onTrackClick(track)
+                            isFullPlayerVisible = true
+                        }
+                    )
                 }
             }
         }
+
+        // Bottom Player Bar
         currentTrack?.let { track ->
             AnimatedVisibility(
                 visible = !isFullPlayerVisible,
@@ -112,10 +141,14 @@ fun MainScreen(
                     track = track,
                     isPlaying = isPlaying,
                     onPlayerClick = { isFullPlayerVisible = true },
-                    onPlayPause = onPlayPause
+                    onPlayPause = onPlayPause,
+                    onNext = onNext,
+                    onPrevious = onPrevious
                 )
             }
         }
+
+        // Full Player Overlay
         currentTrack?.let { track ->
             AnimatedVisibility(
                 visible = isFullPlayerVisible,
@@ -139,6 +172,131 @@ fun MainScreen(
 }
 
 @Composable
+private fun AnimatedHeader(
+    showSearch: Boolean,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    onSearchToggle: () -> Unit,
+    onSettingsClick: () -> Unit
+) {
+    var visible by remember { mutableStateOf(false) }
+    val offsetY by animateFloatAsState(targetValue = if (visible) 0f else -30f, animationSpec = tween(600), label = "header_offset")
+
+    LaunchedEffect(Unit) { visible = true }
+
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 48.dp, start = 20.dp, end = 20.dp, bottom = 16.dp).offset(y = offsetY.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            if (!showSearch) {
+                Text("AEROTUNE", style = MaterialTheme.typography.headlineMedium, color = NeonCyan, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
+                Text("Your Cyberpunk Library", style = MaterialTheme.typography.bodySmall, color = TextGray)
+            } else {
+                SearchBar(query = searchQuery, onQueryChange = onSearchQueryChange)
+            }
+        }
+
+        IconButton(onClick = onSearchToggle) {
+            Icon(if (showSearch) Icons.Default.Close else Icons.Default.Search, if (showSearch) "Close" else "Search", tint = NeonCyan)
+        }
+        IconButton(onClick = onSettingsClick) {
+            Icon(Icons.Default.Settings, "Settings", tint = TextGray)
+        }
+    }
+}
+
+@Composable
+private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
+    BasicTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        modifier = Modifier.fillMaxWidth().background(GlassBg, RoundedCornerShape(12.dp)).padding(16.dp),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(color = TextWhite),
+        cursorBrush = SolidColor(NeonCyan),
+        decorationBox = { innerTextField ->
+            Box {
+                if (query.isEmpty()) {
+                    Text("Search songs...", style = MaterialTheme.typography.bodyLarge, color = TextGray)
+                }
+                innerTextField()
+            }
+        }
+    )
+}
+
+@Composable
+private fun SettingsDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = SurfaceDark,
+        title = { Text("Settings", color = NeonCyan) },
+        text = {
+            Column {
+                SettingsItem(icon = Icons.Default.Info, title = "About", subtitle = "AeroTune v1.0.0")
+                SettingsItem(icon = Icons.Default.Code, title = "Built with", subtitle = "Jetpack Compose + Media3")
+                SettingsItem(icon = Icons.Default.Palette, title = "Theme", subtitle = "Cyberpunk Dark")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close", color = NeonCyan)
+            }
+        }
+    )
+}
+
+@Composable
+private fun SettingsItem(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, subtitle: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, null, tint = NeonCyan, modifier = Modifier.size(24.dp))
+        Spacer(Modifier.width(16.dp))
+        Column {
+            Text(title, style = MaterialTheme.typography.bodyLarge, color = TextWhite)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = TextGray)
+        }
+    }
+}
+
+@Composable
+private fun TrackList(
+    tracks: List<AudioTrack>,
+    currentTrack: AudioTrack?,
+    isPlaying: Boolean,
+    onTrackClick: (AudioTrack) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(bottom = 100.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(tracks, key = { it.id }) { track ->
+            TrackItem(
+                track = track,
+                isPlaying = track == currentTrack && isPlaying,
+                isCurrent = track == currentTrack,
+                onClick = { onTrackClick(track) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun NoSearchResultsView() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(Icons.Default.SearchOff, null, tint = TextGray, modifier = Modifier.size(80.dp))
+            Spacer(Modifier.height(16.dp))
+            Text("No Results", style = MaterialTheme.typography.titleMedium, color = TextWhite)
+            Text("Try a different search term", style = MaterialTheme.typography.bodySmall, color = TextGray)
+        }
+    }
+}
+
+@Composable
 private fun AnimatedBackground() {
     val infiniteTransition = rememberInfiniteTransition(label = "bg")
     val glowAlpha by infiniteTransition.animateFloat(
@@ -153,24 +311,6 @@ private fun AnimatedBackground() {
         Box(modifier = Modifier.fillMaxWidth().height(200.dp).align(Alignment.BottomCenter).background(
             brush = Brush.verticalGradient(listOf(Color.Transparent, NeonPink.copy(alpha = glowAlpha * 0.5f)))
         ))
-    }
-}
-
-@Composable
-private fun AnimatedHeader() {
-    var visible by remember { mutableStateOf(false) }
-    val offsetY by animateFloatAsState(targetValue = if (visible) 0f else -30f, animationSpec = tween(600), label = "header_offset")
-    LaunchedEffect(Unit) { visible = true }
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(top = 48.dp, start = 20.dp, end = 20.dp, bottom = 16.dp).offset(y = offsetY.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text("AEROTUNE", style = MaterialTheme.typography.headlineMedium, color = NeonCyan, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
-            Text("Your Cyberpunk Library", style = MaterialTheme.typography.bodySmall, color = TextGray)
-        }
-        IconButton(onClick = { }) { Icon(Icons.Default.Search, "Search", tint = NeonCyan) }
-        IconButton(onClick = { }) { Icon(Icons.Default.Settings, "Settings", tint = TextGray) }
     }
 }
 
@@ -210,11 +350,12 @@ private fun EmptyLibraryView() {
 }
 
 @Composable
-private fun TrackItem(track: AudioTrack, isPlaying: Boolean, isCurrent: Boolean, onClick: () -> Unit, animationDelay: Int = 0) {
+private fun TrackItem(track: AudioTrack, isPlaying: Boolean, isCurrent: Boolean, onClick: () -> Unit) {
     var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { kotlinx.coroutines.delay(animationDelay.toLong()); visible = true }
+    LaunchedEffect(Unit) { visible = true }
     val offsetX by animateFloatAsState(targetValue = if (visible) 0f else -50f, animationSpec = tween(400), label = "track_offset")
     val alpha by animateFloatAsState(targetValue = if (visible) 1f else 0f, animationSpec = tween(400), label = "track_alpha")
+
     Card(
         modifier = Modifier.fillMaxWidth().offset(x = offsetX.dp).alpha(alpha).clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = if (isCurrent) NeonCyan.copy(alpha = 0.15f) else GlassBg),
@@ -224,7 +365,10 @@ private fun TrackItem(track: AudioTrack, isPlaying: Boolean, isCurrent: Boolean,
             modifier = Modifier.fillMaxWidth().border(1.dp, if (isCurrent) NeonCyan else GlassBorder, RoundedCornerShape(16.dp)).padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(modifier = Modifier.size(56.dp).background(brush = Brush.linearGradient(if (isPlaying) GradientCyanPink else GradientPurpleCyan), shape = RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.size(56.dp).background(
+                brush = Brush.linearGradient(if (isPlaying) GradientCyanPink else GradientPurpleCyan),
+                shape = RoundedCornerShape(12.dp)
+            ), contentAlignment = Alignment.Center) {
                 if (isPlaying) PlayingIndicator() else Icon(Icons.Default.MusicNote, null, tint = Color.White, modifier = Modifier.size(28.dp))
             }
             Spacer(Modifier.width(12.dp))
@@ -253,7 +397,7 @@ private fun PlayingIndicator() {
 }
 
 @Composable
-private fun BottomPlayerBar(track: AudioTrack, isPlaying: Boolean, onPlayerClick: () -> Unit, onPlayPause: () -> Unit) {
+private fun BottomPlayerBar(track: AudioTrack, isPlaying: Boolean, onPlayerClick: () -> Unit, onPlayPause: () -> Unit, onNext: () -> Unit, onPrevious: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).clickable(onClick = onPlayerClick),
         colors = CardDefaults.cardColors(containerColor = GlassBg),
@@ -268,15 +412,30 @@ private fun BottomPlayerBar(track: AudioTrack, isPlaying: Boolean, onPlayerClick
                 Text(track.title, style = MaterialTheme.typography.bodyLarge, color = TextWhite, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(track.artist, style = MaterialTheme.typography.bodySmall, color = TextGray, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
+            IconButton(onClick = onPrevious, modifier = Modifier.size(40.dp)) {
+                Icon(Icons.Default.SkipPrevious, "Previous", tint = TextWhite)
+            }
             IconButton(onClick = onPlayPause, modifier = Modifier.size(48.dp).background(NeonPink, CircleShape)) {
                 Icon(if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow, if (isPlaying) "Pause" else "Play", tint = Color.White, modifier = Modifier.size(28.dp))
+            }
+            IconButton(onClick = onNext, modifier = Modifier.size(40.dp)) {
+                Icon(Icons.Default.SkipNext, "Next", tint = TextWhite)
             }
         }
     }
 }
 
 @Composable
-private fun FullPlayerScreen(track: AudioTrack, isPlaying: Boolean, progress: Float, onBackClick: () -> Unit, onPlayPause: () -> Unit, onNext: () -> Unit, onPrevious: () -> Unit, onSeek: (Float) -> Unit) {
+private fun FullPlayerScreen(
+    track: AudioTrack,
+    isPlaying: Boolean,
+    progress: Float,
+    onBackClick: () -> Unit,
+    onPlayPause: () -> Unit,
+    onNext: () -> Unit,
+    onPrevious: () -> Unit,
+    onSeek: (Float) -> Unit
+) {
     val infiniteTransition = rememberInfiniteTransition(label = "full_player")
     val albumScale by infiniteTransition.animateFloat(
         initialValue = 1f, targetValue = if (isPlaying) 1.05f else 1f,
@@ -288,6 +447,7 @@ private fun FullPlayerScreen(track: AudioTrack, isPlaying: Boolean, progress: Fl
         animationSpec = infiniteRepeatable(animation = tween(1500), repeatMode = RepeatMode.Reverse),
         label = "glow"
     )
+
     Column(modifier = Modifier.fillMaxSize().background(CyberpunkBg).padding(20.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBackClick) { Icon(Icons.Default.KeyboardArrowDown, "Minimize", tint = TextWhite, modifier = Modifier.size(32.dp)) }
@@ -296,7 +456,9 @@ private fun FullPlayerScreen(track: AudioTrack, isPlaying: Boolean, progress: Fl
         }
         Spacer(Modifier.height(40.dp))
         Box(modifier = Modifier.fillMaxWidth().aspectRatio(1f), contentAlignment = Alignment.Center) {
-            Box(modifier = Modifier.fillMaxWidth(0.8f).aspectRatio(1f).background(brush = Brush.radialGradient(listOf(NeonCyan.copy(alpha = glowAlpha * 0.4f), NeonPink.copy(alpha = glowAlpha * 0.2f), Color.Transparent)), shape = RoundedCornerShape(32.dp)).blur(30.dp))
+            Box(modifier = Modifier.fillMaxWidth(0.8f).aspectRatio(1f).background(
+                brush = Brush.radialGradient(listOf(NeonCyan.copy(alpha = glowAlpha * 0.4f), NeonPink.copy(alpha = glowAlpha * 0.2f), Color.Transparent)),
+                shape = RoundedCornerShape(32.dp)).blur(30.dp))
             Box(modifier = Modifier.size(280.dp).scale(albumScale).background(brush = Brush.linearGradient(GradientCyanPink), shape = RoundedCornerShape(32.dp)).border(2.dp, GlassBorder, RoundedCornerShape(32.dp)), contentAlignment = Alignment.Center) {
                 Icon(Icons.Default.MusicNote, null, tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(120.dp))
             }
