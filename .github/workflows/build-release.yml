@@ -1,4 +1,4 @@
-name: Build and Release APK
+name: Build Debug APK
 
 on:
   push:
@@ -25,27 +25,23 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
         with:
           cache-commands: 'build'
 
-
       - name: Create Gradle Wrapper
         run: |
           gradle wrapper --gradle-version 8.11.1
 
-      - name: Build with Gradle
-        run: ./gradlew assembleRelease
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
 
-      - name: Check for APK
+      - name: Check for Debug APK
         run: |
-          ls -la app/build/outputs/apk/release/
-          if [ -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
-            cp app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/AeroTune-release.apk
-          elif [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
-            cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/AeroTune-release.apk
+          ls -la app/build/outputs/apk/debug/
+          if [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
+            cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/AeroTune-Debug-Test.apk
           else
             echo "APK not found!"
             exit 1
@@ -54,12 +50,12 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          release_name: AeroTune v1.0.0
+          tag_name: v1.0.0-debug
+          release_name: AeroTune v1.0.0 Debug Build
           draft: false
           prerelease: false
           generate_release_notes: true
           files: |
-            app/build/outputs/apk/release/AeroTune-release.apk
+            app/build/outputs/apk/debug/AeroTune-Debug-Test.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
