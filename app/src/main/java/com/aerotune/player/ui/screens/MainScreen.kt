@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -59,26 +60,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.aerotune.player.data.model.AudioTrack
 import com.aerotune.player.data.model.PlaybackState
 import com.aerotune.player.data.model.RepeatMode
 import com.aerotune.player.ui.theme.AeroTuneTypography
+import com.aerotune.player.ui.theme.BackgroundPrimary
+import com.aerotune.player.ui.theme.BackgroundSecondary
+import com.aerotune.player.ui.theme.BackgroundTertiary
+import com.aerotune.player.ui.theme.OnSurface
+import com.aerotune.player.ui.theme.OnSurfaceVariant
+import com.aerotune.player.ui.theme.Primary
 
-private val CyberCyan = Color(0xFF00D4FF)
-private val DeepDark = Color(0xFF0A0A1A)
-private val DarkSurface = Color(0xFF121225)
-private val DarkCard = Color(0xFF1A1A2E)
-private val OnSurfaceLight = Color(0xFFE3E3E8)
-private val OnSurfaceMuted = Color(0xFFB8B8C7)
+// Premium Colors
+private val CyberCyan = Primary
+private val DeepDark = BackgroundPrimary
+private val DarkSurface = BackgroundSecondary
+private val DarkCard = BackgroundTertiary
+private val OnSurfaceLight = OnSurface
+private val OnSurfaceMuted = OnSurfaceVariant
 
 @Composable
 fun MainScreen(
@@ -185,19 +196,22 @@ fun MainScreen(
             }
         }
 
-        uiState.playbackState.currentTrack?.let { _ ->
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-            ) {
-                PlayerBottomBar(
-                    playbackState = uiState.playbackState,
-                    onPlayPause = { viewModel.togglePlayPause() },
-                    onNext = { viewModel.nextTrack() },
-                    onPrevious = { viewModel.previousTrack() }
-                )
+        // Show bottom bar ONLY when on Library tab
+        if (uiState.currentTab == 0) {
+            uiState.playbackState.currentTrack?.let { _ ->
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                ) {
+                    PlayerBottomBar(
+                        playbackState = uiState.playbackState,
+                        onPlayPause = { viewModel.togglePlayPause() },
+                        onNext = { viewModel.nextTrack() },
+                        onPrevious = { viewModel.previousTrack() }
+                    )
+                }
             }
         }
     }
@@ -259,11 +273,19 @@ private fun TrackCard(
     isPlaying: Boolean,
     onClick: () -> Unit
 ) {
+    val scale by animateFloatAsState(
+        targetValue = if (isPlaying) 1.02f else 1f,
+        animationSpec = tween(200),
+        label = "card_scale"
+    )
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .scale(scale),
         onClick = onClick,
         colors = CardDefaults.cardColors(
-            containerColor = if (isPlaying) DarkCard.copy(alpha = 0.9f) else DarkSurface.copy(alpha = 0.6f)
+            containerColor = if (isPlaying) DarkCard.copy(alpha = 0.95f) else DarkSurface.copy(alpha = 0.7f)
         ),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -281,7 +303,10 @@ private fun TrackCard(
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
-                    model = track.albumArtUri,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(track.albumArtUri)
+                        .crossfade(true)
+                        .build(),
                     contentDescription = track.album,
                     modifier = Modifier
                         .fillMaxSize()
@@ -364,7 +389,7 @@ private fun NowPlayingTab(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Album art glow
+        // Album art glow effect
         Box(
             modifier = Modifier
                 .size(280.dp)
@@ -376,6 +401,7 @@ private fun NowPlayingTab(
                     )
                 )
         )
+        
         // Album art
         Box(
             modifier = Modifier
@@ -384,7 +410,10 @@ private fun NowPlayingTab(
                 .background(DarkCard)
         ) {
             AsyncImage(
-                model = track.albumArtUri,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(track.albumArtUri)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = track.album,
                 modifier = Modifier
                     .fillMaxSize()
@@ -392,7 +421,9 @@ private fun NowPlayingTab(
                 contentScale = ContentScale.Crop
             )
         }
+        
         Spacer(modifier = Modifier.height(40.dp))
+        
         Text(
             text = track.title,
             style = AeroTuneTypography.headlineSmall.copy(fontWeight = FontWeight.Bold),
@@ -409,11 +440,13 @@ private fun NowPlayingTab(
             overflow = TextOverflow.Ellipsis
         )
         Spacer(modifier = Modifier.height(32.dp))
+        
         var sliderPosition by remember(playbackState.currentPosition) {
             mutableFloatStateOf(
                 playbackState.currentPosition.toFloat() / playbackState.duration.coerceAtLeast(1).toFloat()
             )
         }
+        
         Slider(
             value = sliderPosition,
             onValueChange = { sliderPosition = it },
@@ -425,6 +458,7 @@ private fun NowPlayingTab(
             ),
             modifier = Modifier.fillMaxWidth()
         )
+        
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -441,6 +475,7 @@ private fun NowPlayingTab(
             )
         }
         Spacer(modifier = Modifier.height(32.dp))
+        
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -461,9 +496,17 @@ private fun NowPlayingTab(
                     modifier = Modifier.size(40.dp)
                 )
             }
+            
+            val playScale by animateFloatAsState(
+                targetValue = if (playbackState.isPlaying) 1.1f else 1f,
+                animationSpec = tween(150),
+                label = "play_scale"
+            )
+            
             Box(
                 modifier = Modifier
                     .size(80.dp)
+                    .scale(playScale)
                     .clip(CircleShape)
                     .background(
                         Brush.linearGradient(
@@ -484,6 +527,7 @@ private fun NowPlayingTab(
                     )
                 }
             }
+            
             IconButton(onClick = onNext) {
                 Icon(
                     Icons.Default.SkipNext,
@@ -526,7 +570,10 @@ private fun PlayerBottomBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
-                model = track.albumArtUri,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(track.albumArtUri)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = track.album,
                 modifier = Modifier
                     .size(52.dp)
