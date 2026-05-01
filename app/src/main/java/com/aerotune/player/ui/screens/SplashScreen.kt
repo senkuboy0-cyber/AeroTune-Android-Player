@@ -7,68 +7,65 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aerotune.player.ui.theme.*
-import kotlinx.coroutines.delay
+import com.aerotune.player.ui.theme.NeonCyan
+import com.aerotune.player.ui.theme.NeonPink
 
 @Composable
 fun SplashScreen(onNavigateToMain: () -> Unit) {
-    var startAnimation by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(targetValue = if (startAnimation) 1f else 0.5f, animationSpec = tween(800), label = "splash_scale")
-    val alpha by animateFloatAsState(targetValue = if (startAnimation) 1f else 0f, animationSpec = tween(800), label = "splash_alpha")
-    
+    var visible by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (visible) 1f else 0.5f,
+        animationSpec = tween(800),
+        label = "splash_scale"
+    )
+    val alpha by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = tween(800),
+        label = "splash_alpha"
+    )
+
     LaunchedEffect(Unit) {
-        startAnimation = true
-        delay(2000)
+        visible = true
+        kotlinx.coroutines.delay(2000)
         onNavigateToMain()
     }
-    
+
     Box(
-        modifier = Modifier.fillMaxSize().background(CyberpunkBg),
-        contentAlignment = Alignment.Center
-    ) {
-        // Background glow
-        Box(
-            modifier = Modifier
-                .size(300.dp)
-                .background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            NeonCyan.copy(alpha = 0.3f),
-                            NeonPink.copy(alpha = 0.2f),
-                            android.graphics.Color.Transparent
-                        )
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFF0D0D1A),
+                        Color(0xFF1A1A2E)
                     )
                 )
-        )
-        
+            ),
+        contentAlignment = Alignment.Center
+    ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.alpha(alpha)
+            modifier = Modifier.scale(scale).alpha(alpha)
         ) {
             Text(
-                text = "AERO",
+                text = "AEROTUNE",
                 style = MaterialTheme.typography.displayLarge,
                 color = NeonCyan,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 8.sp
             )
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "TUNE",
-                style = MaterialTheme.typography.displayLarge,
+                text = "CYBERPUNK MUSIC PLAYER",
+                style = MaterialTheme.typography.labelMedium,
                 color = NeonPink,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 8.sp
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Cyberpunk Music Player",
-                style = MaterialTheme.typography.bodyMedium,
-                color = TextGray,
-                letterSpacing = 2.sp
+                letterSpacing = 4.sp
             )
         }
     }
