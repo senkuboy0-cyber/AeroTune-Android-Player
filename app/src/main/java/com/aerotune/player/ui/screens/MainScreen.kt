@@ -26,7 +26,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -53,6 +52,26 @@ fun MainScreen(
     onSettingsClick: () -> Unit = {}
 ) {
     var isFullPlayerVisible by remember { mutableStateOf(false) }
+    var showSearchDialog by remember { mutableStateOf(false) }
+    var showSettingsDialog by remember { mutableStateOf(false) }
+
+    // Show dialogs
+    if (showSearchDialog) {
+        SearchDialog(
+            tracks = tracks,
+            onDismiss = { showSearchDialog = false },
+            onTrackClick = { track ->
+                onTrackClick(track)
+                isFullPlayerVisible = true
+            }
+        )
+    }
+
+    if (showSettingsDialog) {
+        SettingsDialog(
+            onDismiss = { showSettingsDialog = false }
+        )
+    }
 
     Box(
         modifier = Modifier
@@ -63,8 +82,8 @@ fun MainScreen(
         
         Column(modifier = Modifier.fillMaxSize()) {
             AnimatedHeader(
-                onSearchClick = onSearchClick,
-                onSettingsClick = onSettingsClick
+                onSearchClick = { showSearchDialog = true },
+                onSettingsClick = { showSettingsDialog = true }
             )
             
             when {
@@ -144,14 +163,6 @@ fun MainScreen(
                 )
             }
         }
-
-        // Notification Panel (Media Style)
-        NotificationPanel(
-            track = currentTrack,
-            isPlaying = isPlaying,
-            onPlayPause = onPlayPause,
-            onNext = onNext
-        )
     }
 }
 
@@ -213,7 +224,6 @@ private fun AnimatedHeader(
 
     LaunchedEffect(Unit) { visible = true }
 
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -230,7 +240,7 @@ private fun AnimatedHeader(
                 letterSpacing = 2.sp
             )
             Text(
-                text = "Your Cyberpunk Library",
+                text = "${tracks.size} tracks",
                 style = MaterialTheme.typography.bodySmall,
                 color = TextGray
             )
@@ -467,7 +477,6 @@ private fun MiniPlayerBar(
     onNext: () -> Unit
 ) {
     Column {
-        // Progress indicator
         Box(
             modifier = Modifier
                 .fillMaxWidth(progress)
@@ -733,15 +742,4 @@ private fun FullPlayerScreen(
             }
         }
     }
-}
-
-@Composable
-fun NotificationPanel(
-    track: AudioTrack?,
-    isPlaying: Boolean,
-    onPlayPause: () -> Unit,
-    onNext: () -> Unit
-) {
-    // This composable can be used for notification-style UI
-    // The actual Android notification is handled by MediaSessionService
 }
