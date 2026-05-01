@@ -85,7 +85,7 @@ fun MainScreen(
     viewModel: MusicPlayerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
+    
     val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         arrayOf(Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS)
     } else {
@@ -219,7 +219,7 @@ private fun LibraryTab(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularProgressIndicator(color = CyberCyan)
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Scanning music...", color = OnSurfaceMuted)
+                    Text("Scanning...", color = OnSurfaceMuted)
                 }
             }
         }
@@ -347,7 +347,7 @@ private fun NowPlayingTab(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("Nothing Playing", style = AeroTuneTypography.titleLarge, color = OnSurfaceLight)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Select a track from library", color = OnSurfaceMuted)
+                Text("Select a track", color = OnSurfaceMuted)
             }
         }
         return
@@ -358,13 +358,15 @@ private fun NowPlayingTab(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        // Album art glow
         Box(
             modifier = Modifier
                 .size(280.dp)
                 .blur(80.dp)
                 .clip(CircleShape)
-                .background(Brush.radialGradient(colors = listOf(CyberCyan.copy(alpha = 0.4f), Color.Transparent))
+                .background(Brush.radialGradient(colors = listOf(CyberCyan.copy(alpha = 0.4f), Color.Transparent)))
         )
+        // Album art
         Box(
             modifier = Modifier
                 .size(260.dp)
@@ -423,19 +425,10 @@ private fun NowPlayingTab(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onShuffle) {
-                Icon(
-                    Icons.Default.Shuffle,
-                    contentDescription = "Shuffle",
-                    tint = if (playbackState.shuffleEnabled) CyberCyan else OnSurfaceMuted
-                )
+                Icon(Icons.Default.Shuffle, "Shuffle", tint = if (playbackState.shuffleEnabled) CyberCyan else OnSurfaceMuted)
             }
             IconButton(onClick = onPrevious) {
-                Icon(
-                    Icons.Default.SkipPrevious,
-                    contentDescription = "Previous",
-                    tint = OnSurfaceLight,
-                    modifier = Modifier.size(40.dp)
-                )
+                Icon(Icons.Default.SkipPrevious, "Previous", tint = OnSurfaceLight, modifier = Modifier.size(40.dp))
             }
             Box(
                 modifier = Modifier
@@ -447,24 +440,19 @@ private fun NowPlayingTab(
                 IconButton(onClick = onPlayPause, modifier = Modifier.fillMaxSize()) {
                     Icon(
                         if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (playbackState.isPlaying) "Pause" else "Play",
+                        if (playbackState.isPlaying) "Pause" else "Play",
                         tint = Color.Black,
                         modifier = Modifier.size(48.dp)
                     )
                 }
             }
             IconButton(onClick = onNext) {
-                Icon(
-                    Icons.Default.SkipNext,
-                    contentDescription = "Next",
-                    tint = OnSurfaceLight,
-                    modifier = Modifier.size(40.dp)
-                )
+                Icon(Icons.Default.SkipNext, "Next", tint = OnSurfaceLight, modifier = Modifier.size(40.dp))
             }
             IconButton(onClick = onRepeat) {
                 Icon(
                     if (playbackState.repeatMode == RepeatMode.ONE) Icons.Default.RepeatOne else Icons.Default.Repeat,
-                    contentDescription = "Repeat",
+                    "Repeat",
                     tint = if (playbackState.repeatMode != RepeatMode.OFF) CyberCyan else OnSurfaceMuted
                 )
             }
@@ -516,7 +504,7 @@ private fun PlayerBottomBar(
                 )
             }
             IconButton(onClick = onPrevious) {
-                Icon(Icons.Default.SkipPrevious, contentDescription = "Previous", tint = OnSurfaceLight)
+                Icon(Icons.Default.SkipPrevious, "Previous", tint = OnSurfaceLight)
             }
             Box(
                 modifier = Modifier
@@ -528,13 +516,13 @@ private fun PlayerBottomBar(
                 IconButton(onClick = onPlayPause, modifier = Modifier.fillMaxSize()) {
                     Icon(
                         if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (playbackState.isPlaying) "Pause" else "Play",
+                        if (playbackState.isPlaying) "Pause" else "Play",
                         tint = Color.Black
                     )
                 }
             }
             IconButton(onClick = onNext) {
-                Icon(Icons.Default.SkipNext, contentDescription = "Next", tint = OnSurfaceLight)
+                Icon(Icons.Default.SkipNext, "Next", tint = OnSurfaceLight)
             }
         }
     }
