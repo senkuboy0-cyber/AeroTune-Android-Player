@@ -1,633 +1,370 @@
 package com.aerotune.player.ui.screens
 
-import android.Manifest
-import android.os.Build
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Repeat
-import androidx.compose.material.icons.filled.RepeatOne
-import androidx.compose.material.icons.filled.Shuffle
-import androidx.compose.material.icons.filled.SkipNext
-import androidx.compose.material.icons.filled.SkipPrevious
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.aerotune.player.data.model.AudioTrack
-import com.aerotune.player.data.model.PlaybackState
-import com.aerotune.player.data.model.RepeatMode
-import com.aerotune.player.ui.theme.AeroTuneTypography
-import com.aerotune.player.ui.theme.BackgroundPrimary
-import com.aerotune.player.ui.theme.BackgroundSecondary
-import com.aerotune.player.ui.theme.BackgroundTertiary
-import com.aerotune.player.ui.theme.OnSurface
-import com.aerotune.player.ui.theme.OnSurfaceVariant
-import com.aerotune.player.ui.theme.Primary
-
-// Premium Colors
-private val CyberCyan = Primary
-private val DeepDark = BackgroundPrimary
-private val DarkSurface = BackgroundSecondary
-private val DarkCard = BackgroundTertiary
-private val OnSurfaceLight = OnSurface
-private val OnSurfaceMuted = OnSurfaceVariant
+import com.aerotune.player.ui.theme.*
 
 @Composable
 fun MainScreen(
-    viewModel: MusicPlayerViewModel = hiltViewModel()
+    tracks: List<AudioTrack> = emptyList(),
+    currentTrack: AudioTrack? = null,
+    isPlaying: Boolean = false,
+    onTrackClick: (AudioTrack) -> Unit = {},
+    onPlayPause: () -> Unit = {},
+    onNext: () -> Unit = {},
+    onPrevious: () -> Unit = {}
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    
-    val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        arrayOf(Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS)
-    } else {
-        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-    }
+    var isFullPlayerVisible by remember { mutableStateOf(false) }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
-    ) { result ->
-        val allGranted = result.values.all { it }
-        viewModel.setPermissionGranted(allGranted)
-    }
-
-    LaunchedEffect(Unit) {
-        permissionLauncher.launch(permissions)
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(DeepDark, Color(0xFF050510))
-                )
+    Box(modifier = Modifier.fillMaxSize().background(CyberpunkBg)) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Text(
+                text = "YOUR CYBERNETIC LIBRARY",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(start = 16.dp, top = 48.dp, bottom = 16.dp)
             )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .navigationBarsPadding()
-        ) {
-            TabRow(
-                selectedTabIndex = uiState.currentTab,
-                containerColor = Color.Transparent,
-                contentColor = CyberCyan,
-                indicator = { tabPositions ->
-                    TabRowDefaults.SecondaryIndicator(
-                        modifier = Modifier.tabIndicatorOffset(tabPositions[uiState.currentTab]),
-                        color = CyberCyan,
-                        height = 3.dp
+            
+            if (tracks.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "No tracks found",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = TextGray
                     )
                 }
-            ) {
-                Tab(
-                    selected = uiState.currentTab == 0,
-                    onClick = { viewModel.setCurrentTab(0) },
-                    text = {
-                        Text(
-                            text = "LIBRARY",
-                            fontWeight = if (uiState.currentTab == 0) FontWeight.Bold else FontWeight.Normal,
-                            letterSpacing = 2.sp
-                        )
-                    },
-                    selectedContentColor = CyberCyan,
-                    unselectedContentColor = OnSurfaceMuted
-                )
-                Tab(
-                    selected = uiState.currentTab == 1,
-                    onClick = { viewModel.setCurrentTab(1) },
-                    text = {
-                        Text(
-                            text = "NOW PLAYING",
-                            fontWeight = if (uiState.currentTab == 1) FontWeight.Bold else FontWeight.Normal,
-                            letterSpacing = 2.sp
-                        )
-                    },
-                    selectedContentColor = CyberCyan,
-                    unselectedContentColor = OnSurfaceMuted
-                )
-            }
-
-            AnimatedContent(
-                targetState = uiState.currentTab,
-                transitionSpec = {
-                    fadeIn(tween(300)) togetherWith fadeOut(tween(300))
-                },
-                label = "tab_content"
-            ) { tab ->
-                when (tab) {
-                    0 -> LibraryTab(
-                        tracks = uiState.tracks,
-                        isLoading = uiState.isLoading,
-                        onTrackClick = { viewModel.playTrack(it) },
-                        currentTrack = uiState.playbackState.currentTrack
-                    )
-                    1 -> NowPlayingTab(
-                        playbackState = uiState.playbackState,
-                        onPlayPause = { viewModel.togglePlayPause() },
-                        onNext = { viewModel.nextTrack() },
-                        onPrevious = { viewModel.previousTrack() },
-                        onShuffle = { viewModel.toggleShuffle() },
-                        onRepeat = { viewModel.toggleRepeatMode() },
-                        onSeek = { viewModel.seekTo(it) }
-                    )
-                }
-            }
-        }
-
-        // Show bottom bar ONLY when on Library tab
-        if (uiState.currentTab == 0) {
-            uiState.playbackState.currentTrack?.let { _ ->
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                ) {
-                    PlayerBottomBar(
-                        playbackState = uiState.playbackState,
-                        onPlayPause = { viewModel.togglePlayPause() },
-                        onNext = { viewModel.nextTrack() },
-                        onPrevious = { viewModel.previousTrack() }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun LibraryTab(
-    tracks: List<AudioTrack>,
-    isLoading: Boolean,
-    onTrackClick: (AudioTrack) -> Unit,
-    currentTrack: AudioTrack?
-) {
-    when {
-        isLoading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator(color = CyberCyan)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Scanning...", color = OnSurfaceMuted)
-                }
-            }
-        }
-        tracks.isEmpty() -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("No tracks found", color = OnSurfaceLight, style = AeroTuneTypography.titleMedium)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Add music to your device", color = OnSurfaceMuted)
-                }
-            }
-        }
-        else -> {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 100.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                itemsIndexed(tracks) { _, track ->
+            } else {
+                tracks.forEach { track ->
                     TrackCard(
                         track = track,
-                        isPlaying = track == currentTrack,
-                        onClick = { onTrackClick(track) }
+                        isCurrentTrack = track == currentTrack,
+                        onClick = {
+                            onTrackClick(track)
+                            isFullPlayerVisible = true
+                        }
                     )
                 }
+            }
+        }
+
+        // Bottom Player Bar
+        currentTrack?.let { track ->
+            if (!isFullPlayerVisible) {
+                AnimatedVisibility(
+                    visible = !isFullPlayerVisible,
+                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                ) {
+                    BottomPlayerBar(
+                        track = track,
+                        isPlaying = isPlaying,
+                        onPlayerClick = { isFullPlayerVisible = true },
+                        onPlayPause = onPlayPause
+                    )
+                }
+            }
+        }
+
+        // Full Player Overlay
+        currentTrack?.let { track ->
+            AnimatedVisibility(
+                visible = isFullPlayerVisible,
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                FullPlayerScreen(
+                    track = track,
+                    isPlaying = isPlaying,
+                    onBackClick = { isFullPlayerVisible = false },
+                    onPlayPause = onPlayPause,
+                    onNext = onNext,
+                    onPrevious = onPrevious
+                )
             }
         }
     }
 }
 
 @Composable
-private fun TrackCard(
+fun TrackCard(
     track: AudioTrack,
-    isPlaying: Boolean,
+    isCurrentTrack: Boolean = false,
     onClick: () -> Unit
 ) {
-    val scale by animateFloatAsState(
-        targetValue = if (isPlaying) 1.02f else 1f,
-        animationSpec = tween(200),
-        label = "card_scale"
-    )
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .scale(scale),
-        onClick = onClick,
-        colors = CardDefaults.cardColors(
-            containerColor = if (isPlaying) DarkCard.copy(alpha = 0.95f) else DarkSurface.copy(alpha = 0.7f)
-        ),
-        shape = RoundedCornerShape(16.dp)
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .background(GlassBg, RoundedCornerShape(16.dp))
+            .border(1.dp, if (isCurrentTrack) NeonCyan else GlassBorder, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(60.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(if (isPlaying) CyberCyan.copy(alpha = 0.2f) else DarkCard),
+                    .size(50.dp)
+                    .background(
+                        if (isCurrentTrack) NeonCyan.copy(alpha = 0.2f)
+                        else NeonPink.copy(alpha = 0.1f),
+                        RoundedCornerShape(12.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(track.albumArtUri)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = track.album,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Crop
+                Icon(
+                    imageVector = Icons.Default.MusicNote,
+                    contentDescription = null,
+                    tint = if (isCurrentTrack) NeonCyan else NeonPink,
+                    modifier = Modifier.size(30.dp)
                 )
-                if (isPlaying) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.6f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = "Playing",
-                            tint = CyberCyan,
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-                }
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp)
+            ) {
                 Text(
                     text = track.title,
-                    style = AeroTuneTypography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-                    color = if (isPlaying) CyberCyan else OnSurfaceLight,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    style = MaterialTheme.typography.titleMedium,
+                    color = if (isCurrentTrack) NeonCyan else TextWhite
                 )
-                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = track.artist,
-                    style = AeroTuneTypography.bodySmall,
-                    color = OnSurfaceMuted,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextGray
                 )
             }
             Text(
                 text = track.formatDuration(),
-                style = AeroTuneTypography.labelMedium,
-                color = OnSurfaceMuted
+                style = MaterialTheme.typography.labelMedium
             )
         }
     }
 }
 
 @Composable
-private fun NowPlayingTab(
-    playbackState: PlaybackState,
-    onPlayPause: () -> Unit,
-    onNext: () -> Unit,
-    onPrevious: () -> Unit,
-    onShuffle: () -> Unit,
-    onRepeat: () -> Unit,
-    onSeek: (Long) -> Unit
+fun BottomPlayerBar(
+    track: AudioTrack,
+    isPlaying: Boolean,
+    onPlayerClick: () -> Unit,
+    onPlayPause: () -> Unit
 ) {
-    val track = playbackState.currentTrack
-
-    if (track == null) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .background(GlassBg, RoundedCornerShape(24.dp))
+            .border(1.dp, GlassBorder, RoundedCornerShape(24.dp))
+            .clip(RoundedCornerShape(24.dp))
+            .clickable(onClick = onPlayerClick)
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .size(50.dp)
+                .background(NeonPink.copy(alpha = 0.2f), RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Nothing Playing", style = AeroTuneTypography.titleLarge, color = OnSurfaceLight)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Select a track", color = OnSurfaceMuted)
-            }
-        }
-        return
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // Album art glow effect
-        Box(
-            modifier = Modifier
-                .size(280.dp)
-                .blur(80.dp)
-                .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(CyberCyan.copy(alpha = 0.4f), Color.Transparent)
-                    )
-                )
-        )
-        
-        // Album art
-        Box(
-            modifier = Modifier
-                .size(260.dp)
-                .clip(RoundedCornerShape(32.dp))
-                .background(DarkCard)
-        ) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(track.albumArtUri)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = track.album,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(32.dp)),
-                contentScale = ContentScale.Crop
+            Icon(
+                imageVector = Icons.Default.MusicNote,
+                contentDescription = null,
+                tint = NeonCyan,
+                modifier = Modifier.size(30.dp)
             )
         }
-        
-        Spacer(modifier = Modifier.height(40.dp))
-        
-        Text(
-            text = track.title,
-            style = AeroTuneTypography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-            color = OnSurfaceLight,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = track.artist,
-            style = AeroTuneTypography.bodyMedium,
-            color = OnSurfaceMuted,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        var sliderPosition by remember(playbackState.currentPosition) {
-            mutableFloatStateOf(
-                playbackState.currentPosition.toFloat() / playbackState.duration.coerceAtLeast(1).toFloat()
-            )
-        }
-        
-        Slider(
-            value = sliderPosition,
-            onValueChange = { sliderPosition = it },
-            onValueChangeFinished = { onSeek((sliderPosition * playbackState.duration).toLong()) },
-            colors = SliderDefaults.colors(
-                thumbColor = CyberCyan,
-                activeTrackColor = CyberCyan,
-                inactiveTrackColor = DarkCard
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-        
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 12.dp)
         ) {
             Text(
-                text = formatTime(playbackState.currentPosition),
-                style = AeroTuneTypography.labelSmall,
-                color = OnSurfaceMuted
+                text = track.title,
+                style = MaterialTheme.typography.bodyLarge
             )
             Text(
-                text = formatTime(playbackState.duration),
-                style = AeroTuneTypography.labelSmall,
-                color = OnSurfaceMuted
+                text = track.artist,
+                style = MaterialTheme.typography.bodyMedium
             )
         }
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onShuffle) {
-                Icon(
-                    Icons.Default.Shuffle,
-                    contentDescription = "Shuffle",
-                    tint = if (playbackState.shuffleEnabled) CyberCyan else OnSurfaceMuted
-                )
-            }
-            IconButton(onClick = onPrevious) {
-                Icon(
-                    Icons.Default.SkipPrevious,
-                    contentDescription = "Previous",
-                    tint = OnSurfaceLight,
-                    modifier = Modifier.size(40.dp)
-                )
-            }
-            
-            val playScale by animateFloatAsState(
-                targetValue = if (playbackState.isPlaying) 1.1f else 1f,
-                animationSpec = tween(150),
-                label = "play_scale"
+        IconButton(onClick = onPlayPause) {
+            Icon(
+                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                contentDescription = if (isPlaying) "Pause" else "Play",
+                tint = NeonCyan,
+                modifier = Modifier.size(40.dp)
             )
-            
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .scale(playScale)
-                    .clip(CircleShape)
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(CyberCyan, Color(0xFF0088AA))
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                IconButton(
-                    onClick = onPlayPause,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Icon(
-                        if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (playbackState.isPlaying) "Pause" else "Play",
-                        tint = Color.Black,
-                        modifier = Modifier.size(48.dp)
-                    )
-                }
-            }
-            
-            IconButton(onClick = onNext) {
-                Icon(
-                    Icons.Default.SkipNext,
-                    contentDescription = "Next",
-                    tint = OnSurfaceLight,
-                    modifier = Modifier.size(40.dp)
-                )
-            }
-            IconButton(onClick = onRepeat) {
-                Icon(
-                    if (playbackState.repeatMode == RepeatMode.ONE) Icons.Default.RepeatOne else Icons.Default.Repeat,
-                    contentDescription = "Repeat",
-                    tint = if (playbackState.repeatMode != RepeatMode.OFF) CyberCyan else OnSurfaceMuted
-                )
-            }
         }
     }
 }
 
 @Composable
-private fun PlayerBottomBar(
-    playbackState: PlaybackState,
+fun FullPlayerScreen(
+    track: AudioTrack,
+    isPlaying: Boolean,
+    onBackClick: () -> Unit,
     onPlayPause: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit
 ) {
-    val track = playbackState.currentTrack ?: return
+    val infiniteTransition = rememberInfiniteTransition()
+    val albumArtScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
 
-    Card(
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = DarkCard.copy(alpha = 0.95f)),
-        shape = RoundedCornerShape(20.dp)
+            .fillMaxSize()
+            .background(CyberpunkBg)
+            .padding(20.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .height(60.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(track.albumArtUri)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = track.album,
-                modifier = Modifier
-                    .size(52.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = TextWhite
+                )
+            }
+            Text(
+                text = "NOW PLAYING",
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.weight(1f)
             )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = track.title,
-                    style = AeroTuneTypography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = OnSurfaceLight,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = track.artist,
-                    style = AeroTuneTypography.bodySmall,
-                    color = OnSurfaceMuted,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+        }
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        Box(
+            modifier = Modifier
+                .size(300.dp)
+                .align(Alignment.CenterHorizontally)
+                .scale(if (isPlaying) albumArtScale else 1f)
+                .background(GlassBg, RoundedCornerShape(32.dp))
+                .border(2.dp, GlassBorder, RoundedCornerShape(32.dp))
+                .padding(20.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.MusicNote,
+                contentDescription = null,
+                tint = NeonCyan.copy(alpha = 0.5f),
+                modifier = Modifier.size(200.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(40.dp))
+
+        Text(
+            text = track.title,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+        Text(
+            text = track.artist,
+            style = MaterialTheme.typography.titleMedium,
+            color = NeonCyan,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        Slider(
+            value = 0.5f,
+            onValueChange = {},
+            colors = SliderDefaults.colors(
+                thumbColor = NeonCyan,
+                activeTrackColor = NeonCyan,
+                inactiveTrackColor = GlassBorder
+            )
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 30.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = onPrevious,
+                modifier = Modifier.size(60.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.SkipPrevious,
+                    contentDescription = "Previous",
+                    tint = TextWhite,
+                    modifier = Modifier.size(40.dp)
                 )
             }
-            IconButton(onClick = onPrevious) {
-                Icon(Icons.Default.SkipPrevious, contentDescription = "Previous", tint = OnSurfaceLight)
-            }
+
+            Spacer(modifier = Modifier.width(30.dp))
+
             Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(CyberCyan),
+                    .size(80.dp)
+                    .background(NeonPink, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 IconButton(
                     onClick = onPlayPause,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.size(80.dp)
                 ) {
                     Icon(
-                        if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (playbackState.isPlaying) "Pause" else "Play",
-                        tint = Color.Black
+                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        contentDescription = if (isPlaying) "Pause" else "Play",
+                        tint = TextWhite,
+                        modifier = Modifier.size(50.dp)
                     )
                 }
             }
-            IconButton(onClick = onNext) {
-                Icon(Icons.Default.SkipNext, contentDescription = "Next", tint = OnSurfaceLight)
+
+            Spacer(modifier = Modifier.width(30.dp))
+
+            IconButton(
+                onClick = onNext,
+                modifier = Modifier.size(60.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.SkipNext,
+                    contentDescription = "Next",
+                    tint = TextWhite,
+                    modifier = Modifier.size(40.dp)
+                )
             }
         }
     }
-}
-
-private fun formatTime(millis: Long): String {
-    if (millis <= 0) return "0:00"
-    val minutes = millis / 1000 / 60
-    val seconds = (millis / 1000) % 60
-    return String.format("%d:%02d", minutes, seconds)
 }
