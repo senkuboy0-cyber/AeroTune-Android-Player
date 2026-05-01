@@ -1,26 +1,24 @@
 package com.aerotune.player.ui.screens
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.TextField
+import androidx.compose.foundation.text.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.aerotune.player.data.model.AudioTrack
 import com.aerotune.player.ui.theme.*
@@ -40,7 +38,6 @@ fun SearchDialog(
             it.album.contains(searchQuery, ignoreCase = true)
         }
     }
-
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier
@@ -49,9 +46,7 @@ fun SearchDialog(
             colors = CardDefaults.cardColors(containerColor = SurfaceDark),
             shape = RoundedCornerShape(24.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -71,33 +66,20 @@ fun SearchDialog(
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.height(16.dp))
-
                 // Search input
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(GlassBg, RoundedCornerShape(12.dp))
-                        .padding(12.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("Search songs, artists...", color = TextGray) },
+                    leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = null,
                             tint = NeonCyan
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        BasicTextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            textStyle = LocalTextStyle.current.copy(color = TextWhite),
-                            cursorBrush = SolidColor(NeonCyan),
-                            placeholder = {
-                                Text("Search songs, artists...", color = TextGray)
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
+                    },
+                    trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
                             IconButton(onClick = { searchQuery = "" }) {
                                 Icon(
@@ -107,15 +89,23 @@ fun SearchDialog(
                                 )
                             }
                         }
-                    }
-                }
-
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = TextWhite,
+                        unfocusedTextColor = TextWhite,
+                        focusedContainerColor = GlassBg,
+                        unfocusedContainerColor = GlassBg,
+                        cursorColor = NeonCyan,
+                        focusedIndicatorColor = NeonCyan,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp)
+                )
                 Spacer(modifier = Modifier.height(16.dp))
-
                 // Results
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(filteredTracks) { track ->
                         SearchResultItem(
                             track = track,
@@ -126,7 +116,6 @@ fun SearchDialog(
                         )
                     }
                 }
-
                 if (filteredTracks.isEmpty() && searchQuery.isNotEmpty()) {
                     Box(
                         modifier = Modifier
@@ -195,18 +184,14 @@ private fun SearchResultItem(
 }
 
 @Composable
-fun SettingsDialog(
-    onDismiss: () -> Unit
-) {
+fun SettingsDialog(onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = SurfaceDark),
             shape = RoundedCornerShape(24.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(24.dp)
-            ) {
+            Column(modifier = Modifier.padding(24.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -226,30 +211,23 @@ fun SettingsDialog(
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.height(24.dp))
-
-                // App Info
                 SettingsItem(
                     icon = Icons.Default.Info,
                     title = "About",
                     subtitle = "AeroTune v1.0.0"
                 )
-
                 SettingsItem(
                     icon = Icons.Default.Palette,
                     title = "Theme",
                     subtitle = "Cyberpunk Dark"
                 )
-
                 SettingsItem(
                     icon = Icons.Default.Storage,
                     title = "Audio Quality",
                     subtitle = "High Quality"
                 )
-
                 Spacer(modifier = Modifier.height(16.dp))
-
                 Text(
                     text = "Ultra-premium Cyberpunk Music Player",
                     style = MaterialTheme.typography.bodySmall,

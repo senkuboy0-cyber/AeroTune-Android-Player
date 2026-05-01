@@ -20,6 +20,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
@@ -55,7 +56,6 @@ fun MainScreen(
     var showSearchDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
 
-    // Show dialogs
     if (showSearchDialog) {
         SearchDialog(
             tracks = tracks,
@@ -79,13 +79,14 @@ fun MainScreen(
             .background(CyberpunkBg)
     ) {
         AnimatedBackground()
-        
+
         Column(modifier = Modifier.fillMaxSize()) {
             AnimatedHeader(
+                trackCount = tracks.size,
                 onSearchClick = { showSearchDialog = true },
                 onSettingsClick = { showSettingsDialog = true }
             )
-            
+
             when {
                 !hasPermission -> {
                     PermissionCard(onRequestPermission = onPermissionRequest)
@@ -124,7 +125,6 @@ fun MainScreen(
             }
         }
 
-        // Mini Player
         currentTrack?.let { track ->
             AnimatedVisibility(
                 visible = !isFullPlayerVisible,
@@ -143,7 +143,6 @@ fun MainScreen(
             }
         }
 
-        // Full Player
         currentTrack?.let { track ->
             AnimatedVisibility(
                 visible = isFullPlayerVisible,
@@ -178,7 +177,6 @@ private fun AnimatedBackground() {
         ),
         label = "glow"
     )
-
     Box(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
@@ -212,6 +210,7 @@ private fun AnimatedBackground() {
 
 @Composable
 private fun AnimatedHeader(
+    trackCount: Int,
     onSearchClick: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
@@ -240,7 +239,7 @@ private fun AnimatedHeader(
                 letterSpacing = 2.sp
             )
             Text(
-                text = "${tracks.size} tracks",
+                text = "$trackCount tracks",
                 style = MaterialTheme.typography.bodySmall,
                 color = TextGray
             )
@@ -489,7 +488,6 @@ private fun MiniPlayerBar(
                 .height(3.dp)
                 .background(GlassBorder)
         )
-        
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -623,9 +621,7 @@ private fun FullPlayerScreen(
                 )
             }
         }
-
         Spacer(modifier = Modifier.height(40.dp))
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -667,9 +663,7 @@ private fun FullPlayerScreen(
                 )
             }
         }
-
         Spacer(modifier = Modifier.height(40.dp))
-
         Text(
             text = track.title,
             style = MaterialTheme.typography.headlineSmall,
@@ -684,9 +678,7 @@ private fun FullPlayerScreen(
             color = NeonCyan,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
-
         Spacer(modifier = Modifier.height(24.dp))
-
         Slider(
             value = progress,
             onValueChange = onSeek,
@@ -703,9 +695,7 @@ private fun FullPlayerScreen(
             Text("0:00", style = MaterialTheme.typography.labelSmall, color = TextGray)
             Text(track.formatDuration(), style = MaterialTheme.typography.labelSmall, color = TextGray)
         }
-
         Spacer(modifier = Modifier.height(24.dp))
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
