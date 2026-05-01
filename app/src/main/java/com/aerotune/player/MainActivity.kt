@@ -9,7 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.aerotune.player.ui.AeroTuneNavHost
 import com.aerotune.player.ui.theme.AeroTuneTheme
-import com.aerotune.player.ui.theme.DeepDark
+import com.aerotune.player.ui.theme.BackgroundPrimary
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
             AeroTuneTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = DeepDark
+                    color = BackgroundPrimary
                 ) {
                     AeroTuneNavHost()
                 }
