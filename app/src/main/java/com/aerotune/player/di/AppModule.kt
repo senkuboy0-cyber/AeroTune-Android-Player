@@ -2,7 +2,6 @@ package com.aerotune.player.di
 
 import android.content.ContentResolver
 import android.content.Context
-import androidx.media3.exoplayer.ExoPlayer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,13 +19,5 @@ object AppModule {
         @ApplicationContext context: Context
     ): ContentResolver {
         return context.contentResolver
-    }
-
-    @Provides
-    @Singleton
-    fun provideExoPlayer(
-        @ApplicationContext context: Context
-    ): ExoPlayer {
-        return ExoPlayer.Builder(context).build()
     }
 }
