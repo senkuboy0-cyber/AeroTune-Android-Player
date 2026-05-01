@@ -6,8 +6,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// Using system fonts as fallback - Inter/Poppins would be loaded via Google Fonts
-private val AeroTuneFontFamily = FontFamily.SansSerif
+// Premium Sans-Serif Font Family
+val AeroTuneFontFamily = FontFamily.SansSerif
 
 val AeroTuneTypography = Typography(
     displayLarge = TextStyle(
@@ -21,43 +21,38 @@ val AeroTuneTypography = Typography(
         fontFamily = AeroTuneFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 45.sp,
-        lineHeight = 52.sp,
-        letterSpacing = 0.sp
+        lineHeight = 52.sp
     ),
     displaySmall = TextStyle(
         fontFamily = AeroTuneFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 36.sp,
-        lineHeight = 44.sp,
-        letterSpacing = 0.sp
+        lineHeight = 44.sp
     ),
     headlineLarge = TextStyle(
         fontFamily = AeroTuneFontFamily,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
         fontSize = 32.sp,
         lineHeight = 40.sp,
-        letterSpacing = 0.sp
+        letterSpacing = 0.5.sp
     ),
     headlineMedium = TextStyle(
         fontFamily = AeroTuneFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 28.sp,
-        lineHeight = 36.sp,
-        letterSpacing = 0.sp
+        lineHeight = 36.sp
     ),
     headlineSmall = TextStyle(
         fontFamily = AeroTuneFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 24.sp,
-        lineHeight = 32.sp,
-        letterSpacing = 0.sp
+        lineHeight = 32.sp
     ),
     titleLarge = TextStyle(
         fontFamily = AeroTuneFontFamily,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
+        lineHeight = 28.sp
     ),
     titleMedium = TextStyle(
         fontFamily = AeroTuneFontFamily,
