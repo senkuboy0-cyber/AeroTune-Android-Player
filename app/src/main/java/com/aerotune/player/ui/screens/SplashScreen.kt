@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
@@ -25,29 +26,22 @@ import kotlinx.coroutines.delay
 @Composable
 fun SplashScreen(onNavigateToMain: () -> Unit) {
     var startAnimation by remember { mutableStateOf(false) }
-
-    // Entrance animations
     val logoScale by animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
         label = "logo_scale"
     )
-
     val logoAlpha by animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0f,
         animationSpec = tween(durationMillis = 800),
         label = "logo_alpha"
     )
-
     val textOffset by animateFloatAsState(
         targetValue = if (startAnimation) 0f else 50f,
         animationSpec = tween(durationMillis = 600, delayMillis = 300),
         label = "text_offset"
     )
-
-    // Infinite pulse animation
     val infiniteTransition = rememberInfiniteTransition(label = "infinite")
-
     val pulseScale by infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue = 1.15f,
@@ -57,7 +51,6 @@ fun SplashScreen(onNavigateToMain: () -> Unit) {
         ),
         label = "pulse"
     )
-
     val glowAlpha by infiniteTransition.animateFloat(
         initialValue = 0.3f,
         targetValue = 0.8f,
@@ -67,7 +60,6 @@ fun SplashScreen(onNavigateToMain: () -> Unit) {
         ),
         label = "glow"
     )
-
     val rotation by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
@@ -77,8 +69,6 @@ fun SplashScreen(onNavigateToMain: () -> Unit) {
         ),
         label = "rotation"
     )
-
-    // Particle positions
     val particles = remember {
         listOf(
             Offset(0.1f, 0.2f),
@@ -89,20 +79,15 @@ fun SplashScreen(onNavigateToMain: () -> Unit) {
             Offset(0.5f, 0.9f)
         )
     }
-
     LaunchedEffect(Unit) {
         startAnimation = true
         delay(3500)
         onNavigateToMain()
     }
-
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(CyberpunkBg),
+        modifier = Modifier.fillMaxSize().background(CyberpunkBg),
         contentAlignment = Alignment.Center
     ) {
-        // Animated particles background
         Canvas(modifier = Modifier.fillMaxSize().blur(60.dp)) {
             particles.forEachIndexed { index, pos ->
                 val color = when (index % 3) {
@@ -117,59 +102,34 @@ fun SplashScreen(onNavigateToMain: () -> Unit) {
                 )
             }
         }
-
-        // Rotating ring
-        Box(
-            modifier = Modifier
-                .size(200.dp)
-                .rotate(rotation)
-        ) {
+        Box(modifier = Modifier.size(200.dp).rotate(rotation)) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawCircle(
-                    brush = Brush.sweepGradient(
-                        colors = listOf(NeonCyan, NeonPink, NeonPurple, NeonCyan)
-                    ),
+                    brush = Brush.sweepGradient(colors = listOf(NeonCyan, NeonPink, NeonPurple, NeonCyan)),
                     radius = size.minDimension / 2,
                     style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx())
                 )
             }
         }
-
-        // Main content
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            // Glowing circle with pulse
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             Box(
-                modifier = Modifier
-                    .size(140.dp)
-                    .scale(logoScale * pulseScale),
+                modifier = Modifier.size(140.dp).scale(logoScale * pulseScale),
                 contentAlignment = Alignment.Center
             ) {
-                // Glow effect
                 Box(
                     modifier = Modifier
                         .size(150.dp)
                         .background(
                             brush = Brush.radialGradient(
-                                colors = listOf(
-                                    NeonCyan.copy(alpha = glowAlpha * 0.4f),
-                                    Color.Transparent
-                                )
+                                colors = listOf(NeonCyan.copy(alpha = glowAlpha * 0.4f), Color.Transparent)
                             ),
                             shape = CircleShape
                         )
                 )
-
-                // Main icon circle
                 Box(
                     modifier = Modifier
                         .size(120.dp)
-                        .background(
-                            brush = Brush.linearGradient(GradientCyanPink),
-                            shape = CircleShape
-                        ),
+                        .background(brush = Brush.linearGradient(GradientCyanPink), shape = CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -181,23 +141,16 @@ fun SplashScreen(onNavigateToMain: () -> Unit) {
                     )
                 }
             }
-
             Spacer(modifier = Modifier.height(40.dp))
-
-            // Animated text
             Text(
                 text = "AEROTUNE",
                 color = NeonCyan,
                 fontSize = 42.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 10.sp,
-                modifier = Modifier
-                    .offset(y = textOffset.dp)
-                    .alpha(logoAlpha)
+                modifier = Modifier.offset(y = textOffset.dp).alpha(logoAlpha)
             )
-
             Spacer(modifier = Modifier.height(8.dp))
-
             Text(
                 text = "CYBERPUNK MUSIC PLAYER",
                 color = TextGray,
@@ -206,18 +159,11 @@ fun SplashScreen(onNavigateToMain: () -> Unit) {
                 letterSpacing = 4.sp,
                 modifier = Modifier.alpha(logoAlpha)
             )
-
             Spacer(modifier = Modifier.height(50.dp))
-
-            // Loading indicator
             LoadingDots(alpha = logoAlpha)
         }
-
-        // Version text at bottom
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
+            modifier = Modifier.fillMaxSize().padding(24.dp),
             contentAlignment = Alignment.BottomCenter
         ) {
             Text(
@@ -233,7 +179,6 @@ fun SplashScreen(onNavigateToMain: () -> Unit) {
 @Composable
 private fun LoadingDots(alpha: Float) {
     val infiniteTransition = rememberInfiniteTransition(label = "loading")
-
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         repeat(3) { index ->
             val scale by infiniteTransition.animateFloat(
@@ -245,7 +190,6 @@ private fun LoadingDots(alpha: Float) {
                 ),
                 label = "dot_$index"
             )
-
             Box(
                 modifier = Modifier
                     .size(10.dp)
