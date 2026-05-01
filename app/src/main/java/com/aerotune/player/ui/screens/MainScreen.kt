@@ -268,7 +268,9 @@ private fun TrackCard(
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
@@ -281,7 +283,9 @@ private fun TrackCard(
                 AsyncImage(
                     model = track.albumArtUri,
                     contentDescription = track.album,
-                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(12.dp)),
                     contentScale = ContentScale.Crop
                 )
                 if (isPlaying) {
@@ -354,7 +358,9 @@ private fun NowPlayingTab(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -364,7 +370,11 @@ private fun NowPlayingTab(
                 .size(280.dp)
                 .blur(80.dp)
                 .clip(CircleShape)
-                .background(Brush.radialGradient(colors = listOf(CyberCyan.copy(alpha = 0.4f), Color.Transparent)))
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(CyberCyan.copy(alpha = 0.4f), Color.Transparent)
+                    )
+                )
         )
         // Album art
         Box(
@@ -376,7 +386,9 @@ private fun NowPlayingTab(
             AsyncImage(
                 model = track.albumArtUri,
                 contentDescription = track.album,
-                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(32.dp)),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(32.dp)),
                 contentScale = ContentScale.Crop
             )
         }
@@ -398,7 +410,9 @@ private fun NowPlayingTab(
         )
         Spacer(modifier = Modifier.height(32.dp))
         var sliderPosition by remember(playbackState.currentPosition) {
-            mutableFloatStateOf(playbackState.currentPosition.toFloat() / playbackState.duration.coerceAtLeast(1).toFloat())
+            mutableFloatStateOf(
+                playbackState.currentPosition.toFloat() / playbackState.duration.coerceAtLeast(1).toFloat()
+            )
         }
         Slider(
             value = sliderPosition,
@@ -415,8 +429,16 @@ private fun NowPlayingTab(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = formatTime(playbackState.currentPosition), style = AeroTuneTypography.labelSmall, color = OnSurfaceMuted)
-            Text(text = formatTime(playbackState.duration), style = AeroTuneTypography.labelSmall, color = OnSurfaceMuted)
+            Text(
+                text = formatTime(playbackState.currentPosition),
+                style = AeroTuneTypography.labelSmall,
+                color = OnSurfaceMuted
+            )
+            Text(
+                text = formatTime(playbackState.duration),
+                style = AeroTuneTypography.labelSmall,
+                color = OnSurfaceMuted
+            )
         }
         Spacer(modifier = Modifier.height(32.dp))
         Row(
@@ -425,34 +447,55 @@ private fun NowPlayingTab(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onShuffle) {
-                Icon(Icons.Default.Shuffle, "Shuffle", tint = if (playbackState.shuffleEnabled) CyberCyan else OnSurfaceMuted)
+                Icon(
+                    Icons.Default.Shuffle,
+                    contentDescription = "Shuffle",
+                    tint = if (playbackState.shuffleEnabled) CyberCyan else OnSurfaceMuted
+                )
             }
             IconButton(onClick = onPrevious) {
-                Icon(Icons.Default.SkipPrevious, "Previous", tint = OnSurfaceLight, modifier = Modifier.size(40.dp))
+                Icon(
+                    Icons.Default.SkipPrevious,
+                    contentDescription = "Previous",
+                    tint = OnSurfaceLight,
+                    modifier = Modifier.size(40.dp)
+                )
             }
             Box(
                 modifier = Modifier
                     .size(80.dp)
                     .clip(CircleShape)
-                    .background(Brush.linearGradient(colors = listOf(CyberCyan, Color(0xFF0088AA))),
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(CyberCyan, Color(0xFF0088AA))
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                IconButton(onClick = onPlayPause, modifier = Modifier.fillMaxSize()) {
+                IconButton(
+                    onClick = onPlayPause,
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     Icon(
                         if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        if (playbackState.isPlaying) "Pause" else "Play",
+                        contentDescription = if (playbackState.isPlaying) "Pause" else "Play",
                         tint = Color.Black,
                         modifier = Modifier.size(48.dp)
                     )
                 }
             }
             IconButton(onClick = onNext) {
-                Icon(Icons.Default.SkipNext, "Next", tint = OnSurfaceLight, modifier = Modifier.size(40.dp))
+                Icon(
+                    Icons.Default.SkipNext,
+                    contentDescription = "Next",
+                    tint = OnSurfaceLight,
+                    modifier = Modifier.size(40.dp)
+                )
             }
             IconButton(onClick = onRepeat) {
                 Icon(
                     if (playbackState.repeatMode == RepeatMode.ONE) Icons.Default.RepeatOne else Icons.Default.Repeat,
-                    "Repeat",
+                    contentDescription = "Repeat",
                     tint = if (playbackState.repeatMode != RepeatMode.OFF) CyberCyan else OnSurfaceMuted
                 )
             }
@@ -477,13 +520,17 @@ private fun PlayerBottomBar(
         shape = RoundedCornerShape(20.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
                 model = track.albumArtUri,
                 contentDescription = track.album,
-                modifier = Modifier.size(52.dp).clip(RoundedCornerShape(12.dp)),
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.width(12.dp))
@@ -504,7 +551,7 @@ private fun PlayerBottomBar(
                 )
             }
             IconButton(onClick = onPrevious) {
-                Icon(Icons.Default.SkipPrevious, "Previous", tint = OnSurfaceLight)
+                Icon(Icons.Default.SkipPrevious, contentDescription = "Previous", tint = OnSurfaceLight)
             }
             Box(
                 modifier = Modifier
@@ -513,16 +560,19 @@ private fun PlayerBottomBar(
                     .background(CyberCyan),
                 contentAlignment = Alignment.Center
             ) {
-                IconButton(onClick = onPlayPause, modifier = Modifier.fillMaxSize()) {
+                IconButton(
+                    onClick = onPlayPause,
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     Icon(
                         if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        if (playbackState.isPlaying) "Pause" else "Play",
+                        contentDescription = if (playbackState.isPlaying) "Pause" else "Play",
                         tint = Color.Black
                     )
                 }
             }
             IconButton(onClick = onNext) {
-                Icon(Icons.Default.SkipNext, "Next", tint = OnSurfaceLight)
+                Icon(Icons.Default.SkipNext, contentDescription = "Next", tint = OnSurfaceLight)
             }
         }
     }
