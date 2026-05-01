@@ -17,9 +17,7 @@ class AudioRepository @Inject constructor(
 ) {
     suspend fun loadAudioFiles(): List<AudioTrack> = withContext(Dispatchers.IO) {
         val audioList = mutableListOf<AudioTrack>()
-
         val collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
@@ -28,7 +26,6 @@ class AudioRepository @Inject constructor(
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media.ALBUM_ID
         )
-
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
         val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
 
@@ -79,7 +76,6 @@ class AudioRepository @Inject constructor(
                 )
             }
         }
-
         audioList
     }
 }

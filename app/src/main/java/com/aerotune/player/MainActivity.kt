@@ -4,12 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
+import androidx.compose.animation.*
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.aerotune.player.ui.MusicViewModel
 import com.aerotune.player.ui.screens.MainScreen
 import com.aerotune.player.ui.screens.SplashScreen
 import com.aerotune.player.ui.theme.AeroTuneTheme
@@ -23,11 +23,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             AeroTuneTheme {
                 var showSplash by remember { mutableStateOf(true) }
+                val viewModel: MusicViewModel = hiltViewModel()
+                val uiState by viewModel.uiState.collectAsState()
+
                 AnimatedContent(
                     targetState = showSplash,
                     transitionSpec = {
-                        fadeIn(animationSpec = tween(500)) togetherWith
-                                fadeOut(animationSpec = tween(500))
+                        fadeIn(animationSpec = androidx.compose.animation.core.tween(500)) togetherWith
+                                fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
                     },
                     label = "splash_transition"
                 ) { isSplash ->
@@ -35,15 +38,20 @@ class MainActivity : ComponentActivity() {
                         SplashScreen(onNavigateToMain = { showSplash = false })
                     } else {
                         MainScreen(
-                            tracks = emptyList(),
-                            currentTrack = null,
-                            isPlaying = false,
-                            onTrackClick = {},
-                            onPlayPause = {},
-                            onNext = {},
-                            onPrevious = {},
-                            onSeek = {},
-                            progress = 0f
+                            tracks = uiState.tracks,
+                            currentTrack = uiState.currentTrack,
+                            isPlaying = uiState.isPlaying,
+                            isLoading = uiState.isLoading,
+                            hasPermission = uiState.hasPermission,
+                            onTrackClick = { track -> viewModel.playTrack(track) },
+                            onPlayPause = { viewModel.togglePlayPause() },
+                            onNext = { viewModel.nextTrack() },
+                            onPrevious = { viewModel.previousTrack() },
+                            onSeek = { progress -> viewModel.seekTo(progress) },
+                            onPermissionRequest = { viewModel.setPermissionGranted(true) },
+                            progress = uiState.progress,
+                            onSearchClick = { /* TODO: Implement search */ },
+                            onSettingsClick = { /* TODO: Implement settings */ }
                         )
                     }
                 }
