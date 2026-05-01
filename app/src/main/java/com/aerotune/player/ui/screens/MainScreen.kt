@@ -85,7 +85,7 @@ fun MainScreen(
     viewModel: MusicPlayerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    
+
     val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         arrayOf(Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS)
     } else {
@@ -272,7 +272,9 @@ private fun TrackCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier.size(60.dp).clip(RoundedCornerShape(12.dp))
+                modifier = Modifier
+                    .size(60.dp)
+                    .clip(RoundedCornerShape(12.dp))
                     .background(if (isPlaying) CyberCyan.copy(alpha = 0.2f) else DarkCard),
                 contentAlignment = Alignment.Center
             ) {
@@ -284,7 +286,9 @@ private fun TrackCard(
                 )
                 if (isPlaying) {
                     Box(
-                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.6f)),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.6f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -355,11 +359,17 @@ private fun NowPlayingTab(
         verticalArrangement = Arrangement.Center
     ) {
         Box(
-            modifier = Modifier.size(280.dp).blur(80.dp).clip(CircleShape)
+            modifier = Modifier
+                .size(280.dp)
+                .blur(80.dp)
+                .clip(CircleShape)
                 .background(Brush.radialGradient(colors = listOf(CyberCyan.copy(alpha = 0.4f), Color.Transparent))
         )
         Box(
-            modifier = Modifier.size(260.dp).clip(RoundedCornerShape(32.dp)).background(DarkCard)
+            modifier = Modifier
+                .size(260.dp)
+                .clip(RoundedCornerShape(32.dp))
+                .background(DarkCard)
         ) {
             AsyncImage(
                 model = track.albumArtUri,
@@ -413,32 +423,48 @@ private fun NowPlayingTab(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onShuffle) {
-                Icon(Icons.Default.Shuffle, "Shuffle", tint = if (playbackState.shuffleEnabled) CyberCyan else OnSurfaceMuted)
+                Icon(
+                    Icons.Default.Shuffle,
+                    contentDescription = "Shuffle",
+                    tint = if (playbackState.shuffleEnabled) CyberCyan else OnSurfaceMuted
+                )
             }
             IconButton(onClick = onPrevious) {
-                Icon(Icons.Default.SkipPrevious, "Previous", tint = OnSurfaceLight, modifier = Modifier.size(40.dp))
+                Icon(
+                    Icons.Default.SkipPrevious,
+                    contentDescription = "Previous",
+                    tint = OnSurfaceLight,
+                    modifier = Modifier.size(40.dp)
+                )
             }
             Box(
-                modifier = Modifier.size(80.dp).clip(CircleShape)
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
                     .background(Brush.linearGradient(colors = listOf(CyberCyan, Color(0xFF0088AA))),
                 contentAlignment = Alignment.Center
             ) {
                 IconButton(onClick = onPlayPause, modifier = Modifier.fillMaxSize()) {
                     Icon(
                         if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        if (playbackState.isPlaying) "Pause" else "Play",
+                        contentDescription = if (playbackState.isPlaying) "Pause" else "Play",
                         tint = Color.Black,
                         modifier = Modifier.size(48.dp)
                     )
                 }
             }
             IconButton(onClick = onNext) {
-                Icon(Icons.Default.SkipNext, "Next", tint = OnSurfaceLight, modifier = Modifier.size(40.dp))
+                Icon(
+                    Icons.Default.SkipNext,
+                    contentDescription = "Next",
+                    tint = OnSurfaceLight,
+                    modifier = Modifier.size(40.dp)
+                )
             }
             IconButton(onClick = onRepeat) {
                 Icon(
                     if (playbackState.repeatMode == RepeatMode.ONE) Icons.Default.RepeatOne else Icons.Default.Repeat,
-                    "Repeat",
+                    contentDescription = "Repeat",
                     tint = if (playbackState.repeatMode != RepeatMode.OFF) CyberCyan else OnSurfaceMuted
                 )
             }
@@ -456,7 +482,9 @@ private fun PlayerBottomBar(
     val track = playbackState.currentTrack ?: return
 
     Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         colors = CardDefaults.cardColors(containerColor = DarkCard.copy(alpha = 0.95f)),
         shape = RoundedCornerShape(20.dp)
     ) {
@@ -488,22 +516,25 @@ private fun PlayerBottomBar(
                 )
             }
             IconButton(onClick = onPrevious) {
-                Icon(Icons.Default.SkipPrevious, "Previous", tint = OnSurfaceLight)
+                Icon(Icons.Default.SkipPrevious, contentDescription = "Previous", tint = OnSurfaceLight)
             }
             Box(
-                modifier = Modifier.size(48.dp).clip(CircleShape).background(CyberCyan),
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(CyberCyan),
                 contentAlignment = Alignment.Center
             ) {
                 IconButton(onClick = onPlayPause, modifier = Modifier.fillMaxSize()) {
                     Icon(
                         if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        if (playbackState.isPlaying) "Pause" else "Play",
+                        contentDescription = if (playbackState.isPlaying) "Pause" else "Play",
                         tint = Color.Black
                     )
                 }
             }
             IconButton(onClick = onNext) {
-                Icon(Icons.Default.SkipNext, "Next", tint = OnSurfaceLight)
+                Icon(Icons.Default.SkipNext, contentDescription = "Next", tint = OnSurfaceLight)
             }
         }
     }
