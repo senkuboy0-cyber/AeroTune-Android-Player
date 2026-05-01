@@ -5,18 +5,9 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -50,7 +41,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Tab
@@ -63,7 +53,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -196,8 +185,7 @@ fun MainScreen(
             }
         }
 
-        // Bottom Player Bar
-        uiState.playbackState.currentTrack?.let { track ->
+        uiState.playbackState.currentTrack?.let { _ ->
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -275,43 +263,28 @@ private fun TrackCard(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
         colors = CardDefaults.cardColors(
-            containerColor = if (isPlaying) 
-                DarkCard.copy(alpha = 0.9f) 
-            else 
-                DarkSurface.copy(alpha = 0.6f)
+            containerColor = if (isPlaying) DarkCard.copy(alpha = 0.9f) else DarkSurface.copy(alpha = 0.6f)
         ),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier
-                    .size(60.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        if (isPlaying) CyberCyan.copy(alpha = 0.2f) 
-                        else DarkCard
-                    ),
+                modifier = Modifier.size(60.dp).clip(RoundedCornerShape(12.dp))
+                    .background(if (isPlaying) CyberCyan.copy(alpha = 0.2f) else DarkCard),
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
                     model = track.albumArtUri,
                     contentDescription = track.album,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(12.dp)),
+                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
                     contentScale = ContentScale.Crop
                 )
-                
                 if (isPlaying) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.6f)),
+                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.6f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -323,9 +296,7 @@ private fun TrackCard(
                     }
                 }
             }
-
             Spacer(modifier = Modifier.width(16.dp))
-
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = track.title,
@@ -343,7 +314,6 @@ private fun TrackCard(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-
             Text(
                 text = track.formatDuration(),
                 style = AeroTuneTypography.labelMedium,
@@ -371,63 +341,34 @@ private fun NowPlayingTab(
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    "Nothing Playing",
-                    style = AeroTuneTypography.titleLarge,
-                    color = OnSurfaceLight
-                )
+                Text("Nothing Playing", style = AeroTuneTypography.titleLarge, color = OnSurfaceLight)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    "Select a track from library",
-                    color = OnSurfaceMuted
-                )
+                Text("Select a track from library", color = OnSurfaceMuted)
             }
         }
         return
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
+        modifier = Modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Album Art with Glow
         Box(
-            modifier = Modifier
-                .size(280.dp)
-                .blur(80.dp)
-                .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            CyberCyan.copy(alpha = 0.4f),
-                            Color.Transparent
-                        )
-                    )
-                )
+            modifier = Modifier.size(280.dp).blur(80.dp).clip(CircleShape)
+                .background(Brush.radialGradient(colors = listOf(CyberCyan.copy(alpha = 0.4f), Color.Transparent))
         )
-
         Box(
-            modifier = Modifier
-                .size(260.dp)
-                .clip(RoundedCornerShape(32.dp))
-                .background(DarkCard)
+            modifier = Modifier.size(260.dp).clip(RoundedCornerShape(32.dp)).background(DarkCard)
         ) {
             AsyncImage(
                 model = track.albumArtUri,
                 contentDescription = track.album,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(32.dp)),
+                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(32.dp)),
                 contentScale = ContentScale.Crop
             )
         }
-
         Spacer(modifier = Modifier.height(40.dp))
-
-        // Track Info
         Text(
             text = track.title,
             style = AeroTuneTypography.headlineSmall.copy(fontWeight = FontWeight.Bold),
@@ -443,20 +384,14 @@ private fun NowPlayingTab(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-
         Spacer(modifier = Modifier.height(32.dp))
-
-        // Progress Slider
-        var sliderPosition by remember(playbackState.currentPosition) { 
-            mutableFloatStateOf(playbackState.currentPosition.toFloat() / playbackState.duration.coerceAtLeast(1).toFloat()) 
+        var sliderPosition by remember(playbackState.currentPosition) {
+            mutableFloatStateOf(playbackState.currentPosition.toFloat() / playbackState.duration.coerceAtLeast(1).toFloat())
         }
-
         Slider(
             value = sliderPosition,
             onValueChange = { sliderPosition = it },
-            onValueChangeFinished = { 
-                onSeek((sliderPosition * playbackState.duration).toLong()) 
-            },
+            onValueChangeFinished = { onSeek((sliderPosition * playbackState.duration).toLong()) },
             colors = SliderDefaults.colors(
                 thumbColor = CyberCyan,
                 activeTrackColor = CyberCyan,
@@ -464,88 +399,46 @@ private fun NowPlayingTab(
             ),
             modifier = Modifier.fillMaxWidth()
         )
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = formatTime(playbackState.currentPosition),
-                style = AeroTuneTypography.labelSmall,
-                color = OnSurfaceMuted
-            )
-            Text(
-                text = formatTime(playbackState.duration),
-                style = AeroTuneTypography.labelSmall,
-                color = OnSurfaceMuted
-            )
+            Text(text = formatTime(playbackState.currentPosition), style = AeroTuneTypography.labelSmall, color = OnSurfaceMuted)
+            Text(text = formatTime(playbackState.duration), style = AeroTuneTypography.labelSmall, color = OnSurfaceMuted)
         }
-
         Spacer(modifier = Modifier.height(32.dp))
-
-        // Controls
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onShuffle) {
-                Icon(
-                    Icons.Default.Shuffle,
-                    contentDescription = "Shuffle",
-                    tint = if (playbackState.shuffleEnabled) CyberCyan else OnSurfaceMuted
-                )
+                Icon(Icons.Default.Shuffle, "Shuffle", tint = if (playbackState.shuffleEnabled) CyberCyan else OnSurfaceMuted)
             }
-
             IconButton(onClick = onPrevious) {
-                Icon(
-                    Icons.Default.SkipPrevious,
-                    contentDescription = "Previous",
-                    tint = OnSurfaceLight,
-                    modifier = Modifier.size(40.dp)
-                )
+                Icon(Icons.Default.SkipPrevious, "Previous", tint = OnSurfaceLight, modifier = Modifier.size(40.dp))
             }
-
             Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(CyberCyan, Color(0xFF0088AA))
-                        )
-                    ),
+                modifier = Modifier.size(80.dp).clip(CircleShape)
+                    .background(Brush.linearGradient(colors = listOf(CyberCyan, Color(0xFF0088AA))),
                 contentAlignment = Alignment.Center
             ) {
-                IconButton(
-                    onClick = onPlayPause,
-                    modifier = Modifier.fillMaxSize()
-                ) {
+                IconButton(onClick = onPlayPause, modifier = Modifier.fillMaxSize()) {
                     Icon(
-                        imageVector = if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (playbackState.isPlaying) "Pause" else "Play",
+                        if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        if (playbackState.isPlaying) "Pause" else "Play",
                         tint = Color.Black,
                         modifier = Modifier.size(48.dp)
                     )
                 }
             }
-
             IconButton(onClick = onNext) {
-                Icon(
-                    Icons.Default.SkipNext,
-                    contentDescription = "Next",
-                    tint = OnSurfaceLight,
-                    modifier = Modifier.size(40.dp)
-                )
+                Icon(Icons.Default.SkipNext, "Next", tint = OnSurfaceLight, modifier = Modifier.size(40.dp))
             }
-
             IconButton(onClick = onRepeat) {
                 Icon(
-                    imageVector = if (playbackState.repeatMode == RepeatMode.ONE) 
-                        Icons.Default.RepeatOne 
-                    else 
-                        Icons.Default.Repeat,
-                    contentDescription = "Repeat",
+                    if (playbackState.repeatMode == RepeatMode.ONE) Icons.Default.RepeatOne else Icons.Default.Repeat,
+                    "Repeat",
                     tint = if (playbackState.repeatMode != RepeatMode.OFF) CyberCyan else OnSurfaceMuted
                 )
             }
@@ -563,31 +456,21 @@ private fun PlayerBottomBar(
     val track = playbackState.currentTrack ?: return
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = DarkCard.copy(alpha = 0.95f)
-        ),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = DarkCard.copy(alpha = 0.95f)),
         shape = RoundedCornerShape(20.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
                 model = track.albumArtUri,
                 contentDescription = track.album,
-                modifier = Modifier
-                    .size(52.dp)
-                    .clip(RoundedCornerShape(12.dp)),
+                modifier = Modifier.size(52.dp).clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
-
             Spacer(modifier = Modifier.width(12.dp))
-
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = track.title,
@@ -604,40 +487,23 @@ private fun PlayerBottomBar(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-
             IconButton(onClick = onPrevious) {
-                Icon(
-                    Icons.Default.SkipPrevious,
-                    contentDescription = "Previous",
-                    tint = OnSurfaceLight
-                )
+                Icon(Icons.Default.SkipPrevious, "Previous", tint = OnSurfaceLight)
             }
-
             Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(CyberCyan),
+                modifier = Modifier.size(48.dp).clip(CircleShape).background(CyberCyan),
                 contentAlignment = Alignment.Center
             ) {
-                IconButton(
-                    onClick = onPlayPause,
-                    modifier = Modifier.fillMaxSize()
-                ) {
+                IconButton(onClick = onPlayPause, modifier = Modifier.fillMaxSize()) {
                     Icon(
-                        imageVector = if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (playbackState.isPlaying) "Pause" else "Play",
+                        if (playbackState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        if (playbackState.isPlaying) "Pause" else "Play",
                         tint = Color.Black
                     )
                 }
             }
-
             IconButton(onClick = onNext) {
-                Icon(
-                    Icons.Default.SkipNext,
-                    contentDescription = "Next",
-                    tint = OnSurfaceLight
-                )
+                Icon(Icons.Default.SkipNext, "Next", tint = OnSurfaceLight)
             }
         }
     }
