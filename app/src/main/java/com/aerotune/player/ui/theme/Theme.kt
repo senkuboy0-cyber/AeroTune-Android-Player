@@ -5,9 +5,10 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 
 private val DarkColorScheme = darkColorScheme(
-    background = CyberpunkBackground,
-    surface = CyberpunkBackground,
+    background = CyberpunkBg,
+    surface = CyberpunkBg,
     primary = NeonCyan,
+    secondary = NeonPink,
     onBackground = TextWhite,
     onSurface = TextWhite
 )

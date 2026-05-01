@@ -6,33 +6,36 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
+// Using system Sans-Serif as fallback (Inter font can be added manually)
+private val AeroTuneFont = FontFamily.SansSerif
+
 val AeroTuneTypography = Typography(
     titleLarge = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = AeroTuneFont,
         fontWeight = FontWeight.Bold,
-        fontSize = 22.sp,
+        fontSize = 28.sp,
         color = TextWhite
     ),
     titleMedium = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = AeroTuneFont,
         fontWeight = FontWeight.Bold,
-        fontSize = 18.sp,
+        fontSize = 20.sp,
         color = TextWhite
     ),
     bodyLarge = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = AeroTuneFont,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         color = TextWhite
     ),
     bodyMedium = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = AeroTuneFont,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         color = TextGray
     ),
     labelMedium = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = AeroTuneFont,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
         color = NeonCyan
