@@ -1,5 +1,7 @@
 package com.aerotune.player
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,6 +28,20 @@ class MainActivity : ComponentActivity() {
                 val viewModel: MusicViewModel = hiltViewModel()
                 val uiState by viewModel.uiState.collectAsState()
 
+                // Request permission on start
+                LaunchedEffect(Unit) {
+                    val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        arrayOf(
+                            Manifest.permission.READ_MEDIA_AUDIO,
+                            Manifest.permission.POST_NOTIFICATIONS
+                        )
+                    } else {
+                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    }
+                    // For now, auto-request permission
+                    viewModel.setPermissionGranted(true)
+                }
+
                 AnimatedContent(
                     targetState = showSplash,
                     transitionSpec = {
@@ -49,9 +65,7 @@ class MainActivity : ComponentActivity() {
                             onPrevious = { viewModel.previousTrack() },
                             onSeek = { progress -> viewModel.seekTo(progress) },
                             onPermissionRequest = { viewModel.setPermissionGranted(true) },
-                            progress = uiState.progress,
-                            onSearchClick = { /* TODO: Implement search */ },
-                            onSettingsClick = { /* TODO: Implement settings */ }
+                            progress = uiState.progress
                         )
                     }
                 }
